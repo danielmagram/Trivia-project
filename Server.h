@@ -1,23 +1,11 @@
 #pragma once
-
-#include <WinSock2.h>
-#include <Windows.h>
-#include <map>
-#include "IRequestHandler.h"
+#include "Communicator.h"
 
 class Server
 {
 public:
-	Server();
-	~Server();
-	void run();
+    void run();
 
 private:
-
-	void acceptClient();
-	void clientHandler(SOCKET clientSocket);
-
-	SOCKET _serverSocket;
-	std::map<SOCKET, IRequestHandler*> _clients;
+    Communicator m_communicator;
 };
-
