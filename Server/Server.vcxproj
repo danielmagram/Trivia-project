@@ -125,12 +125,15 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\IRequestHandler.h" />
+    <ClInclude Include="..\json.hpp" />
+    <ClInclude Include="..\JsonResponsePacketSerializer.h" />
     <ClInclude Include="..\Server.h" />
     <ClInclude Include="..\LoginRequestHandler.h" />
     <ClInclude Include="..\Communicator.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Communicator.cpp" />
+    <ClCompile Include="..\JsonResponsePacketSerializer.cpp" />
     <ClCompile Include="..\main.cpp" />
     <ClCompile Include="..\Server.cpp" />
   </ItemGroup>
