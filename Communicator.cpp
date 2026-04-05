@@ -64,7 +64,13 @@ void Communicator::startHandleRequests()
         std::cout << "Client connected!" << std::endl;
 
         IRequestHandler* handler = new LoginRequestHandler();
-        m_clients[clientSocket] = handler;
+
+        // --- LOCK BEFORE ADDING TO MAP ---
+        {
+            std::lock_guard<std::mutex> lock(m_clientsMutex);
+            m_clients[clientSocket] = handler;
+        }
+        // Lock automatically releases here
 
         std::thread(&Communicator::handleNewClient, this, clientSocket).detach();
     }
@@ -106,14 +112,26 @@ void Communicator::handleNewClient(SOCKET clientSocket)
 
         closesocket(clientSocket);
 
-        delete m_clients[clientSocket];
-        m_clients.erase(clientSocket);
+        {
+            std::lock_guard<std::mutex> lock(m_clientsMutex);
+            if (m_clients.find(clientSocket) != m_clients.end())
+            {
+                delete m_clients[clientSocket];
+                m_clients.erase(clientSocket);
+            }
+        }
     }
     catch (...)
     {
         closesocket(clientSocket);
 
-        delete m_clients[clientSocket];
-        m_clients.erase(clientSocket);
+        {
+            std::lock_guard<std::mutex> lock(m_clientsMutex);
+            if (m_clients.find(clientSocket) != m_clients.end())
+            {
+                delete m_clients[clientSocket];
+                m_clients.erase(clientSocket);
+            }
+        }
     }
 }
