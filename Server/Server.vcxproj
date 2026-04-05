@@ -135,6 +135,7 @@
     <ClCompile Include="..\Communicator.cpp" />
     <ClCompile Include="..\JsonResponsePacketSerializer.cpp" />
     <ClCompile Include="..\main.cpp" />
+    <ClCompile Include="..\Serailizercheck.cpp" />
     <ClCompile Include="..\Server.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
