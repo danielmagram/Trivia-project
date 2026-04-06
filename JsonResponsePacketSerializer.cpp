@@ -22,7 +22,7 @@ std::vector<unsigned char> buildPacket(unsigned char code, const json& j)
 }
 
 
-std::vector<unsigned char> JsonResponsePacketSerializer::serializeResponse(ErrorResponse response)
+std::vector<unsigned char> JsonResponsePacketSerializer::serializeErrorResponse(ErrorResponse response)
 {
     json j;
     j["message"] = response.message;
@@ -30,7 +30,7 @@ std::vector<unsigned char> JsonResponsePacketSerializer::serializeResponse(Error
     return buildPacket(40, j);
 }
 
-std::vector<unsigned char> JsonResponsePacketSerializer::serializeResponse(LoginResponse response)
+std::vector<unsigned char> JsonResponsePacketSerializer::serializeLoginResponse(LoginResponse response)
 {
     json j;
     j["status"] = response.status;
@@ -38,7 +38,7 @@ std::vector<unsigned char> JsonResponsePacketSerializer::serializeResponse(Login
     return buildPacket(202, j);
 }
 
-std::vector<unsigned char> JsonResponsePacketSerializer::serializeResponse(SignupResponse response)
+std::vector<unsigned char> JsonResponsePacketSerializer::serializeSignupResponse(SignupResponse response)
 {
     json j;
     j["status"] = response.status;
