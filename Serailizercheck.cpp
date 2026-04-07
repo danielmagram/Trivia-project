@@ -1,31 +1,47 @@
-//#include "JsonResponsePacketSerializer.h"
-//#include <vector>
 //#include <iostream>
-//#include <bitset>
+//#include <vector>
+//#include <string>
+//#include "JsonResponsePacketSerializer.h"
+//#include "JsonRequestPacketDeserializer.h"
+//
+//void printBuffer(const std::vector<unsigned char>& buffer)
+//{
+//    std::cout << "[ ";
+//    for (unsigned char byte : buffer)
+//    {
+//        if (byte >= 32 && byte <= 126)
+//            std::cout << "'" << byte << "' ";
+//        else
+//            std::cout << (int)byte << " ";
+//    }
+//    std::cout << "]\n";
+//}
+//
 //int main()
 //{
-//	ErrorResponse errorResponse{ "An error occurred" };
-//	LoginResponse loginResponse{ 1 };
-//	SignupResponse signupResponse{ 0 };
-//	std::vector<unsigned char> errorPacket = JsonResponsePacketSerializer::serializeResponse(errorResponse);
-//	std::vector<unsigned char> loginPacket = JsonResponsePacketSerializer::serializeResponse(loginResponse);
-//	std::vector<unsigned char> signupPacket = JsonResponsePacketSerializer::serializeResponse(signupResponse);
+//    std::cout << "=== TESTING SERIALIZATION (Server to Client) ===\n";
 //
-//	std::cout << "Error Packet: ";
-//	for (auto byte : errorPacket)
-//	{
-//		std::cout << std::bitset<8>(byte) << " ";
-//	}
-//	std::cout << "\n\nLogin Packet: ";
-//	for (auto byte : loginPacket)
-//	{
-//		std::cout << std::bitset<8>(byte) << " ";
-//	}
-//	std::cout << "\n\nSignup Packet: ";
-//	for (auto byte : signupPacket)
-//	{
-//		std::cout << std::bitset<8>(byte) << " ";
-//	}
+//    LoginResponse loginRes;
+//    loginRes.status = 1;
 //
-//	return 0;
+//    std::vector<unsigned char> outBuffer = JsonResponsePacketSerializer::serializeLoginResponse(loginRes);
+//
+//    std::cout << "Serialized LoginResponse (Status: 1):\n";
+//    printBuffer(outBuffer);
+//    std::cout << "Notice the 1-byte code (e.g., 202), followed by 4 bytes of size, followed by the JSON string!\n\n";
+//
+//
+//    std::cout << "=== TESTING DESERIALIZATION (Client to Server) ===\n";
+//
+//
+//    std::string fakeClientJson = R"({"username": "myUser123", "password": "myPassword!"})";
+//    std::vector<unsigned char> inBuffer(fakeClientJson.begin(), fakeClientJson.end());
+//
+//    LoginRequest loginReq = JsonRequestPacketDeserializer::deserializeLoginRequest(inBuffer);
+//
+//    std::cout << "Deserialized LoginRequest:\n";
+//    std::cout << "Username extracted: " << loginReq.username << "\n";
+//    std::cout << "Password extracted: " << loginReq.password << "\n";
+//
+//    return 0;
 //}
