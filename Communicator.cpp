@@ -2,7 +2,12 @@
 #include "LoginRequestHandler.h"
 #include <iostream>
 #include <thread>
-#include <string>
+#include <memory>
+#include "JsonResponsePacketSerializer.h"
+#include <ws2tcpip.h>
+#include <cstring>
+#include <chrono>
+
 
 #pragma comment(lib, "Ws2_32.lib")
 
@@ -102,13 +107,95 @@ void Communicator::handleNewClient(SOCKET clientSocket)
 {
     try
     {
-        std::string msg = "Hello";
-        send(clientSocket, msg.c_str(), msg.size(), 0);
+        
 
-        char buffer[6] = { 0 };
-        recv(clientSocket, buffer, 5, 0);
+        char code;
+        int received = recv(clientSocket, &code, 1, 0);
+        
+        if (received != 1)
+        {
+            throw std::exception("couldnt recieve massage");
 
-        std::cout << "Client said: " << buffer << std::endl;
+        }
+
+        auto now = std::chrono::system_clock::now();
+        std::time_t time = std::chrono::system_clock::to_time_t(now);
+
+        char size[4];
+        received = recv(clientSocket, size, 4, 0);
+
+        if (received != 1)
+        {
+            throw std::exception("couldnt recieve massage");
+
+        }
+
+        uint32_t netSize = 0;
+        std::memcpy(&netSize, size, 4);
+        int payloadSize = ntohl(netSize);
+
+        std::vector<unsigned char> data(payloadSize);
+        uint32_t total = 0;
+        while (total < payloadSize) // there is a loop because recv not always sends data fully
+        {
+            int toRead = static_cast<int>(payloadSize - total);
+            int got = recv(clientSocket, reinterpret_cast<char*>(data.data() + total), toRead, 0);
+            if (got <= 0)
+            {
+                throw std::runtime_error("recv data failed");
+            }
+            total += static_cast<uint32_t>(got);
+        }
+
+        RequestInfo info;
+        info.buffer = data;
+        info.id = code;
+        info.receivalTime = time;
+
+
+
+        std::unique_ptr<IRequestHandler> handler = std::make_unique<LoginRequestHandler>();
+        RequestResult result;
+
+        if (handler->isRequestRelevant(info))
+        {
+            result = handler->handleRequest(info);
+            send(clientSocket, reinterpret_cast<const char*>(result.response.data()), result.response.size(), 0);
+            size_t sentBytes = 0;
+            while (sentBytes < result.response.size())
+            {
+                int s = send(clientSocket, reinterpret_cast<const char*>(result.response.data() + sentBytes), static_cast<int>(result.response.size() - sentBytes), 0);
+                if (s <= 0)
+                {
+                    throw std::runtime_error("sending response failed");
+                }
+                sentBytes += static_cast<size_t>(s);
+            }
+
+
+        }
+        else
+        {
+            ErrorResponse res;
+            res.message = "ERROR: Irelavant Request";
+            result.response = JsonResponsePacketSerializer::serializeErrorResponse(res);
+            result.newHandler = new LoginRequestHandler();
+            send(clientSocket, reinterpret_cast<const char*>(result.response.data()), result.response.size(), 0);
+            size_t sentBytes = 0;
+            while (sentBytes < result.response.size())
+            {
+                int s = send(clientSocket, reinterpret_cast<const char*>(result.response.data() + sentBytes), static_cast<int>(result.response.size() - sentBytes), 0);
+                if (s <= 0)
+                {
+                    throw std::runtime_error("sending response failed");
+                }
+                sentBytes += static_cast<size_t>(s);
+            }
+        }
+
+
+
+        delete(result.newHandler);
 
         closesocket(clientSocket);
 
@@ -135,3 +222,5 @@ void Communicator::handleNewClient(SOCKET clientSocket)
         }
     }
 }
+
+
