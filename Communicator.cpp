@@ -2,7 +2,12 @@
 #include "LoginRequestHandler.h"
 #include <iostream>
 #include <thread>
-#include <string>
+#include <memory>
+#include "JsonResponsePacketSerializer.h"
+#include <ws2tcpip.h>
+#include <cstring>
+#include <chrono>
+
 
 #pragma comment(lib, "Ws2_32.lib")
 
@@ -102,36 +107,106 @@ void Communicator::handleNewClient(SOCKET clientSocket)
 {
     try
     {
-        std::string msg = "Hello";
-        send(clientSocket, msg.c_str(), msg.size(), 0);
-
-        char buffer[6] = { 0 };
-        recv(clientSocket, buffer, 5, 0);
-
-        std::cout << "Client said: " << buffer << std::endl;
-
-        closesocket(clientSocket);
-
+        // BUG FIX 3: We need an infinite loop so the client can send multiple messages!
+        while (true)
         {
-            std::lock_guard<std::mutex> lock(m_clientsMutex);
-            if (m_clients.find(clientSocket) != m_clients.end())
+            char code;
+            int received = recv(clientSocket, &code, 1, 0);
+
+            // If received is 0, the client disconnected safely. If < 0, error.
+            if (received <= 0) break;
+
+            auto now = std::chrono::system_clock::now();
+            std::time_t time = std::chrono::system_clock::to_time_t(now);
+
+            char size[4];
+            received = recv(clientSocket, size, 4, 0);
+
+            // BUG FIX 1: We are expecting 4 bytes, so if it's <= 0, something broke.
+            if (received <= 0) break;
+
+            uint32_t netSize = 0;
+            std::memcpy(&netSize, size, 4);
+            int payloadSize = ntohl(netSize);
+
+            std::vector<unsigned char> data(payloadSize);
+            uint32_t total = 0;
+
+            while (total < payloadSize)
             {
-                delete m_clients[clientSocket];
-                m_clients.erase(clientSocket);
+                int toRead = static_cast<int>(payloadSize - total);
+                int got = recv(clientSocket, reinterpret_cast<char*>(data.data() + total), toRead, 0);
+                if (got <= 0)
+                {
+                    throw std::runtime_error("recv data failed");
+                }
+                total += static_cast<uint32_t>(got);
+            }
+
+            RequestInfo info;
+            info.buffer = data;
+            info.id = code;
+            info.receivalTime = time;
+
+            // BUG FIX 4: Get the handler from the map, don't create a random new one!
+            IRequestHandler* handler = nullptr;
+            {
+                std::lock_guard<std::mutex> lock(m_clientsMutex);
+                handler = m_clients[clientSocket];
+            }
+
+            RequestResult result;
+
+            if (handler->isRequestRelevant(info))
+            {
+                result = handler->handleRequest(info);
+            }
+            else
+            {
+                ErrorResponse res;
+                res.message = "ERROR: Irrelevant Request";
+                result.response = JsonResponsePacketSerializer::serializeErrorResponse(res);
+                result.newHandler = handler; // Stay in current state
+            }
+
+            // BUG FIX 2: Only use ONE send loop! Do not double-send.
+            size_t sentBytes = 0;
+            while (sentBytes < result.response.size())
+            {
+                int s = send(clientSocket, reinterpret_cast<const char*>(result.response.data() + sentBytes),
+                    static_cast<int>(result.response.size() - sentBytes), 0);
+                if (s <= 0)
+                {
+                    throw std::runtime_error("sending response failed");
+                }
+                sentBytes += static_cast<size_t>(s);
+            }
+
+            // BUG FIX 5: Actually update the state machine instead of deleting the new handler
+            if (result.newHandler != nullptr && result.newHandler != handler)
+            {
+                std::lock_guard<std::mutex> lock(m_clientsMutex);
+                m_clients[clientSocket] = result.newHandler;
+                delete handler; // Delete the OLD handler, we are now using the NEW one
             }
         }
     }
-    catch (...)
+    catch (const std::exception& e)
     {
-        closesocket(clientSocket);
+        std::cout << "Client Thread Exception: " << e.what() << std::endl;
+    }
 
+    // We only reach here if the while(true) loop breaks (Client disconnected)
+    closesocket(clientSocket);
+
+    // Clean up the map
+    {
+        std::lock_guard<std::mutex> lock(m_clientsMutex);
+        if (m_clients.find(clientSocket) != m_clients.end())
         {
-            std::lock_guard<std::mutex> lock(m_clientsMutex);
-            if (m_clients.find(clientSocket) != m_clients.end())
-            {
-                delete m_clients[clientSocket];
-                m_clients.erase(clientSocket);
-            }
+            delete m_clients[clientSocket];
+            m_clients.erase(clientSocket);
         }
     }
 }
+
