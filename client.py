@@ -22,10 +22,7 @@ def send_request(sock, code, payload_dict):
 
 def receive_response(sock):
     code = sock.recv(1)
-    print("Received size_bytes length:", len(code))
     size_bytes = sock.recv(4)
-    print("Received size_bytes length:", len(size_bytes))
-    print("Raw size_bytes:", size_bytes)
     size = struct.unpack('!I', size_bytes)[0]
 
     data = b''
@@ -58,8 +55,8 @@ def main():
                 send_request(s, LOGIN_CODE, payload)
 
             elif choice == "signup":
-                mail = input("mail: ")
-                payload = {"username": username, "password": password, "mail": mail}
+                mail = input("email: ")
+                payload = {"username": username, "password": password, "email": mail}
                 send_request(s, SIGNUP_CODE, payload)
 
             else:
