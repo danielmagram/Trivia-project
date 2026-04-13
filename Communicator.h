@@ -3,6 +3,7 @@
 #include <WinSock2.h>
 #include <Windows.h>
 #include <map>
+#include <mutex>
 #include "IRequestHandler.h"
 
 class Communicator
@@ -19,4 +20,5 @@ private:
 
     SOCKET m_serverSocket;
     std::map<SOCKET, IRequestHandler*> m_clients;
+    std::mutex m_clientsMutex; 
 };

@@ -6,4 +6,6 @@ class LoginRequestHandler : public IRequestHandler
 public:
     LoginRequestHandler() = default;
     ~LoginRequestHandler() = default;
+    bool isRequestRelevant(RequestInfo info) override;
+    RequestResult handleRequest(RequestInfo info) override;
 };
