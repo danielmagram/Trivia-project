@@ -1,54 +1,88 @@
 #include "LoginRequestHandler.h"
+#include "RequestHandlerFactory.h"
+#include "MenuRequestHandler.h"
 #include "JsonRequestPacketDeserializer.h"
 #include "JsonResponsePacketSerializer.h"
 
+LoginRequestHandler::LoginRequestHandler(RequestHandlerFactory& factory) : m_handlerFactory(factory)
+{
+}
+
 bool LoginRequestHandler::isRequestRelevant(RequestInfo info)
 {
-    // Check if the message code is Login (202) or SignUp (33)
-    if (info.id == 202 || info.id == 33)
-    {
-        return true;
-    }
-    return false;
+    return (info.id == 202 || info.id == 33);
 }
 
 RequestResult LoginRequestHandler::handleRequest(RequestInfo info)
 {
     RequestResult result;
+    result.newHandler = nullptr;
 
-    if (info.id == 202) // LOGIN
+    try
     {
-        // Deserialize the request
-        LoginRequest req = JsonRequestPacketDeserializer::deserializeLoginRequest(info.buffer);
-
-
-        // Build the response
-        LoginResponse res;
-        res.status = 1; // 1 for success
-
-        // Serialize the response
-        result.response = JsonResponsePacketSerializer::serializeLoginResponse(res);
-
-		result.newHandler = new LoginRequestHandler();// for now, we stay in the same handler, later it will change
+        if (info.id == 202) // LOGIN
+        {
+            return login(info); 
+        }
+        else if (info.id == 33) // SIGNUP
+        {
+            return signup(info); 
+        }
     }
-    else if (info.id == 33) // SIGNUP
+    catch (...)
     {
-        SignupRequest req = JsonRequestPacketDeserializer::deserializeSignUpRequest(info.buffer);
+        ErrorResponse err;
+        err.message = "An error occurred";
+        result.response = JsonResponsePacketSerializer::serializeErrorResponse(err);
+        result.newHandler = nullptr;
+    }
+
+    return result;
+}
 
 
-        SignupResponse res;
+RequestResult LoginRequestHandler::login(RequestInfo info)
+{
+    RequestResult result;
+    LoginRequest req = JsonRequestPacketDeserializer::deserializeLoginRequest(info.buffer);
+
+    bool success = m_handlerFactory.getLoginManager().login(req.username, req.password);
+
+    LoginResponse res;
+    if (success)
+    {
         res.status = 1;
-
-        result.response = JsonResponsePacketSerializer::serializeSignupResponse(res);
-        result.newHandler = new LoginRequestHandler();
+        result.response = JsonResponsePacketSerializer::serializeLoginResponse(res);
+        result.newHandler = m_handlerFactory.createMenuRequestHandler();
     }
     else
     {
-        ErrorResponse res;
-        res.message = "ERROR: Invalid Request";
-        result.response = JsonResponsePacketSerializer::serializeErrorResponse(res);
-        result.newHandler = new LoginRequestHandler();
+        res.status = 0;
+        result.response = JsonResponsePacketSerializer::serializeLoginResponse(res);
+        result.newHandler = m_handlerFactory.createLoginRequestHandler();
     }
+    return result;
+}
 
+RequestResult LoginRequestHandler::signup(RequestInfo info)
+{
+    RequestResult result;
+    SignupRequest req = JsonRequestPacketDeserializer::deserializeSignUpRequest(info.buffer);
+
+    bool success = m_handlerFactory.getLoginManager().signup(req.username, req.password, req.email);
+
+    SignupResponse res;
+    if (success)
+    {
+        res.status = 1;
+        result.response = JsonResponsePacketSerializer::serializeSignupResponse(res);
+        result.newHandler = m_handlerFactory.createMenuRequestHandler();
+    }
+    else
+    {
+        res.status = 0;
+        result.response = JsonResponsePacketSerializer::serializeSignupResponse(res);
+        result.newHandler = m_handlerFactory.createLoginRequestHandler();
+    }
     return result;
 }
