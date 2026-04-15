@@ -1,71 +1,80 @@
 import socket
-import json
 import struct
+import json
+import time
 
-SERVER_HOST = 'localhost'
-SERVER_PORT = 1111
+SERVER_IP = 'localhost'
+SERVER_PORT = 1111 
 
 LOGIN_CODE = 202
 SIGNUP_CODE = 33
 
-
-def send_request(sock, code, payload_dict):
-    json_str = json.dumps(payload_dict)
-    json_bytes = json_str.encode()
-
-    size = struct.pack('!I', len(json_bytes))
-    code_byte = struct.pack('B', code)
-
-    message = code_byte + size + json_bytes
-    sock.sendall(message)
-
+def send_request(sock, code, data_dict):
+    json_data = json.dumps(data_dict).encode('utf-8')
+    size = len(json_data)
+    header = struct.pack('>BI', code, size)
+    sock.sendall(header + json_data)
 
 def receive_response(sock):
-    code = sock.recv(1)
-    size_bytes = sock.recv(4)
-    size = struct.unpack('!I', size_bytes)[0]
+    try:
+        code_data = sock.recv(1)
+        if not code_data:
+            return "Server disconnected"
+        code = struct.unpack('>B', code_data)[0]
+        
+        size_data = sock.recv(4)
+        size = struct.unpack('>I', size_data)[0]
+        
+        json_data = b""
+        while len(json_data) < size:
+            json_data += sock.recv(size - len(json_data))
+            
+        return f"Code: {code}, Data: {json.loads(json_data.decode('utf-8'))}"
+    except Exception as e:
+        return f"Error reading response: {e}"
 
-    data = b''
-    while len(data) < size:
-        chunk = sock.recv(size - len(data))
-        if not chunk:
-            raise Exception("Disconnected")
-        data += chunk
-
-    json_data = json.loads(data.decode())
-    return json_data
-
+def run_test(test_name, code, payload):
+    print(test_name)
+    # Open a fresh connection for EVERY test
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    try:
+        sock.connect((SERVER_IP, SERVER_PORT))
+        send_request(sock, code, payload)
+        print("Response:", receive_response(sock), "\n")
+    except Exception as e:
+        print("Test failed:", e)
+    finally:
+        sock.close() # Close connection after the test
+    time.sleep(0.1)
 
 def main():
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        s.connect((SERVER_HOST, SERVER_PORT))
-        print("Connected to server.")
+    print("Starting Server Tests...\n")
 
-        while True:
-            choice = input("login / signup / exit: ").lower()
+    # 1. Test Input Validation 
+    run_test("--- Test 1: Signup with empty username ---", 
+             SIGNUP_CODE, {"username": "", "password": "Password1!", "email": "test@test.com"})
 
-            if choice == "exit":
-                break
+    # 2. Test Normal Signup random username
+    username = f"tester{int(time.time())}"  # Unique username based on timestamp
+    run_test("--- Test 2: Normal Signup (Creating " + username + ") ---", 
+             SIGNUP_CODE, {"username": username, "password": "Password1!", "email": "test@test.com"})
 
-            username = input("username: ")
-            password = input("password: ")
+    # 3. Test duplicate Signup
+    run_test("--- Test 3: Duplicate Signup (Trying to create " + username + " again) ---", 
+             SIGNUP_CODE, {"username": username, "password": "Password1!", "email": "test@test.com"})
 
-            if choice == "login":
-                payload = {"username": username, "password": password}
-                send_request(s, LOGIN_CODE, payload)
+    # 4. Test Unregistered Login
+    run_test("--- Test 4: Unregistered Login (Trying to login with 'fakeuser') ---", 
+             LOGIN_CODE, {"username": "fakeuser", "password": "Password1!"})
 
-            elif choice == "signup":
-                mail = input("email: ")
-                payload = {"username": username, "password": password, "email": mail}
-                send_request(s, SIGNUP_CODE, payload)
+    # 5. Test Normal Login
+    run_test("--- Test 5: Normal Login (Logging in with " + username + ") ---", 
+             LOGIN_CODE, {"username": username, "password": "Password1!"})
 
-            else:
-                print("Invalid option")
-                continue
-
-            response = receive_response(s)
-            print("Server response:", response)
-
+    # 6. user cant login if already logged in
+    run_test("--- Test 6: Login while already logged in (Trying to login with " + username + " again) ---", 
+             LOGIN_CODE, {"username": username, "password": "Password1!"})
+    
 
 if __name__ == "__main__":
     main()

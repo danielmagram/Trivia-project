@@ -1,11 +1,20 @@
 #pragma once
 #include "IRequestHandler.h"
 
+class RequestHandlerFactory; // Forward declaration
+
 class LoginRequestHandler : public IRequestHandler
 {
 public:
-    LoginRequestHandler() = default;
+    LoginRequestHandler(RequestHandlerFactory& factory);
     ~LoginRequestHandler() = default;
-    bool isRequestRelevant(RequestInfo info) override;
-    RequestResult handleRequest(RequestInfo info) override;
+
+    bool isRequestRelevant(const RequestInfo& info) const override;
+    RequestResult handleRequest(const RequestInfo& info) override;
+
+private:
+    RequestHandlerFactory& m_handlerFactory;
+
+    RequestResult login(const RequestInfo& info);
+    RequestResult signup(const RequestInfo& info);
 };

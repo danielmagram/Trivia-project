@@ -1,4 +1,5 @@
 #include "Communicator.h"
+#include "RequestHandlerFactory.h"
 #include "LoginRequestHandler.h"
 #include <iostream>
 #include <thread>
@@ -10,8 +11,9 @@
 
 
 #pragma comment(lib, "Ws2_32.lib")
+constexpr char EXIT_COMMAND[] = "EXIT";
 
-Communicator::Communicator()
+Communicator::Communicator(RequestHandlerFactory* factory) : m_handlerFactory(factory)
 {
     WSAData wsaData;
     if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
@@ -47,7 +49,7 @@ void Communicator::startHandleRequests()
         {
             std::getline(std::cin, input);
 
-            if (input == "EXIT")
+            if (input == EXIT_COMMAND)
             {
                 std::cout << "Shutting down server..." << std::endl;
                 closesocket(m_serverSocket);
@@ -68,8 +70,7 @@ void Communicator::startHandleRequests()
         }
         std::cout << "Client connected!" << std::endl;
 
-        IRequestHandler* handler = new LoginRequestHandler();
-
+        IRequestHandler* handler = m_handlerFactory->createLoginRequestHandler();
         // --- LOCK BEFORE ADDING TO MAP ---
         {
             std::lock_guard<std::mutex> lock(m_clientsMutex);
@@ -107,13 +108,11 @@ void Communicator::handleNewClient(SOCKET clientSocket)
 {
     try
     {
-        // BUG FIX 3: We need an infinite loop so the client can send multiple messages!
         while (true)
         {
             char code;
             int received = recv(clientSocket, &code, 1, 0);
 
-            // If received is 0, the client disconnected safely. If < 0, error.
             if (received <= 0) break;
 
             auto now = std::chrono::system_clock::now();
@@ -122,7 +121,6 @@ void Communicator::handleNewClient(SOCKET clientSocket)
             char size[4];
             received = recv(clientSocket, size, 4, 0);
 
-            // BUG FIX 1: We are expecting 4 bytes, so if it's <= 0, something broke.
             if (received <= 0) break;
 
             uint32_t netSize = 0;
@@ -148,7 +146,6 @@ void Communicator::handleNewClient(SOCKET clientSocket)
             info.id = code;
             info.receivalTime = time;
 
-            // BUG FIX 4: Get the handler from the map, don't create a random new one!
             IRequestHandler* handler = nullptr;
             {
                 std::lock_guard<std::mutex> lock(m_clientsMutex);
@@ -169,7 +166,6 @@ void Communicator::handleNewClient(SOCKET clientSocket)
                 result.newHandler = handler; // Stay in current state
             }
 
-            // BUG FIX 2: Only use ONE send loop! Do not double-send.
             size_t sentBytes = 0;
             while (sentBytes < result.response.size())
             {
@@ -182,12 +178,11 @@ void Communicator::handleNewClient(SOCKET clientSocket)
                 sentBytes += static_cast<size_t>(s);
             }
 
-            // BUG FIX 5: Actually update the state machine instead of deleting the new handler
             if (result.newHandler != nullptr && result.newHandler != handler)
             {
                 std::lock_guard<std::mutex> lock(m_clientsMutex);
                 m_clients[clientSocket] = result.newHandler;
-                delete handler; // Delete the OLD handler, we are now using the NEW one
+                delete handler; 
             }
         }
     }
@@ -196,10 +191,8 @@ void Communicator::handleNewClient(SOCKET clientSocket)
         std::cout << "Client Thread Exception: " << e.what() << std::endl;
     }
 
-    // We only reach here if the while(true) loop breaks (Client disconnected)
     closesocket(clientSocket);
 
-    // Clean up the map
     {
         std::lock_guard<std::mutex> lock(m_clientsMutex);
         if (m_clients.find(clientSocket) != m_clients.end())

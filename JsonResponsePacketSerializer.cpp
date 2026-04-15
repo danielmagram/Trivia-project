@@ -2,6 +2,9 @@
 #include "json.hpp" 
 using json = nlohmann::json;
 
+constexpr unsigned char ERROR_CODE = 40;
+constexpr unsigned char LOGIN_CODE = 202;
+constexpr unsigned char SIGNUP_CODE = 33;
 //HELPER FUNCTION
 std::vector<unsigned char> buildPacket(unsigned char code, const json& j)
 {
@@ -27,7 +30,7 @@ std::vector<unsigned char> JsonResponsePacketSerializer::serializeErrorResponse(
     json j;
     j["message"] = response.message;
 
-    return buildPacket(40, j);
+    return buildPacket(ERROR_CODE, j);
 }
 
 std::vector<unsigned char> JsonResponsePacketSerializer::serializeLoginResponse(LoginResponse response)
@@ -35,7 +38,7 @@ std::vector<unsigned char> JsonResponsePacketSerializer::serializeLoginResponse(
     json j;
     j["status"] = response.status;
 
-    return buildPacket(202, j);
+    return buildPacket(LOGIN_CODE, j);
 }
 
 std::vector<unsigned char> JsonResponsePacketSerializer::serializeSignupResponse(SignupResponse response)
@@ -43,5 +46,5 @@ std::vector<unsigned char> JsonResponsePacketSerializer::serializeSignupResponse
     json j;
     j["status"] = response.status;
 
-    return buildPacket(33, j);
+    return buildPacket(SIGNUP_CODE, j);
 }
