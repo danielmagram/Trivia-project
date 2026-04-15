@@ -6,10 +6,12 @@
 #include <mutex>
 #include "IRequestHandler.h"
 
+class RequestHandlerFactory;
+
 class Communicator
 {
 public:
-    Communicator();
+    Communicator(RequestHandlerFactory* factory); 
     ~Communicator();
 
     void startHandleRequests();
@@ -21,4 +23,5 @@ private:
     SOCKET m_serverSocket;
     std::map<SOCKET, IRequestHandler*> m_clients;
     std::mutex m_clientsMutex; 
+    RequestHandlerFactory* m_handlerFactory;
 };

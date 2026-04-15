@@ -1,79 +1,92 @@
 import socket
-import json
 import struct
+import json
+import time
 
-SERVER_HOST = 'localhost'
-SERVER_PORT = 1111
+SERVER_IP = 'localhost'
+SERVER_PORT = 1111 
 
 LOGIN_CODE = 202
 SIGNUP_CODE = 33
 
-## need to print full response from server, not just status code
-
-
-def send_request(sock, code, payload_dict):
-    json_str = json.dumps(payload_dict)
-    json_bytes = json_str.encode()
-
-    size = struct.pack('!I', len(json_bytes))
-    code_byte = struct.pack('B', code)
-
-    message = code_byte + size + json_bytes
-    sock.sendall(message)
-
+def send_request(sock, code, data_dict):
+    json_data = json.dumps(data_dict).encode('utf-8')
+    size = len(json_data)
+    header = struct.pack('>BI', code, size)
+    sock.sendall(header + json_data)
 
 def receive_response(sock):
-    code_byte = sock.recv(1)
-    if not code_byte:
-        return None
+    try:
+        code_data = sock.recv(1)
+        if not code_data:
+            return "Server disconnected"
+        code = struct.unpack('>B', code_data)[0]
+        
+        size_data = sock.recv(4)
+        size = struct.unpack('>I', size_data)[0]
+        
+        json_data = b""
+        while len(json_data) < size:
+            json_data += sock.recv(size - len(json_data))
+            
+        return f"Code: {code}, Data: {json.loads(json_data.decode('utf-8'))}"
+    except Exception as e:
+        return f"Error reading response: {e}"
 
-    code = struct.unpack('B', code_byte)[0]
-
-    size_bytes = sock.recv(4)
-    if not size_bytes:
-        return None
-
-    size = struct.unpack('!I', size_bytes)[0]
-
-    json_bytes = b''
-    while len(json_bytes) < size:
-        chunk = sock.recv(size - len(json_bytes))
-        if not chunk:
-            return None
-        json_bytes += chunk
-
-    json_str = json_bytes.decode()
-    response_dict = json.loads(json_str)
-
-    return {"code": code, "data": response_dict}
+def run_test(test_name, code, payload):
+    print(test_name)
+    # Open a fresh connection for EVERY test
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    try:
+        sock.connect((SERVER_IP, SERVER_PORT))
+        send_request(sock, code, payload)
+        print("Response:", receive_response(sock), "\n")
+    except Exception as e:
+        print("Test failed:", e)
+    finally:
+        sock.close() # Close connection after the test
+    time.sleep(0.1)
 
 def main():
-## tries the 4 cases mentioned above, and prints the server response for each case
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+    print("Starting Server Tests...\n")
 
-        sock.connect((SERVER_HOST, SERVER_PORT))
+    # 1. Test Input Validation 
+    run_test("--- Test 1: Signup with empty username ---", 
+             SIGNUP_CODE, {"username": "", "password": "Password1!", "email": "test@test.com"})
 
-        send_request(sock, SIGNUP_CODE, {"username": "", "password": "pass2"})
-        response = receive_response(sock)
-        print("Signup with empty username:", response)    
+    # 2. Test Normal Signup random username
+    username = f"tester{int(time.time())}"  # Unique username based on timestamp
+    run_test("--- Test 2: Normal Signup (Creating " + username + ") ---", 
+             SIGNUP_CODE, {"username": username, "password": "Password1!", "email": "test@test.com"})
 
-        send_request(sock, SIGNUP_CODE, {"username": "user1", "password": "pass1"})
-        response = receive_response(sock)
-        print("Signup with existing username:", response)
+    # 3. Test duplicate Signup
+    run_test("--- Test 3: Duplicate Signup (Trying to create " + username + " again) ---", 
+             SIGNUP_CODE, {"username": username, "password": "Password1!", "email": "test@test.com"})
 
-        send_request(sock, LOGIN_CODE, {"username": "user24234", "password": "pass1"})
-        response = receive_response(sock)
-        print("Login without registration:", response)
+    # 4. Test Unregistered Login
+    run_test("--- Test 4: Unregistered Login (Trying to login with 'fakeuser') ---", 
+             LOGIN_CODE, {"username": "fakeuser", "password": "Password1!"})
 
-        send_request(sock, LOGIN_CODE, {"username": "user1", "password": "pass1"})
-        response = receive_response(sock)
-        print("Login with correct credentials:", response)
+    # 5. Test Normal Login
+    run_test("--- Test 5: Normal Login (Logging in with " + username + ") ---", 
+             LOGIN_CODE, {"username": username, "password": "Password1!"})
 
-        send_request(sock, LOGIN_CODE, {"username": "user1", "password": "pass1"})
-        response = receive_response(sock)
-        print("Login while already logged in:", response)
-
-
+    # 6. Test Double Login
+    print("--- Test 6: Double Login (Logging in twice at the same time) ---")
+    sock1 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock2 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    
+    sock1.connect((SERVER_IP, SERVER_PORT))
+    send_request(sock1, LOGIN_CODE, {"username": username, "password": "Password1!"})
+    print("User 1 Response:", receive_response(sock1))
+    
+    # While sock1 is still connected, sock2 tries to login as the same user
+    sock2.connect((SERVER_IP, SERVER_PORT))
+    send_request(sock2, LOGIN_CODE, {"username": username, "password": "Password1!"})
+    print("User 2 Response:", receive_response(sock2), "\n")
+    
+    sock1.close()
+    sock2.close()
 
 if __name__ == "__main__":
     main()

@@ -10,6 +10,10 @@ LoginManager::LoginManager(IDatabase* db)
 
 SignUpStatus LoginManager::signup(const std::string& username, const std::string& password, const std::string& email)
 {
+    if (username.empty() || password.empty() || email.empty())
+    {
+        return { WRONG_PARAMETERS };
+    }
     try
     {
         if (m_database->doesUserExist(username))
@@ -25,6 +29,13 @@ SignUpStatus LoginManager::signup(const std::string& username, const std::string
 }
 LoginStatus LoginManager::login(const std::string& username, const std::string& password)
 {
+    for (const auto& user : m_loggedUsers)
+    {
+        if (user.getUsername() == username)
+        {
+            return { WRONG_PARAMETERS }; 
+        }
+    }
     try
     {
         if (!m_database->doesUserExist(username) || !m_database->doesPasswordMatch(username, password))

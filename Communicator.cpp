@@ -1,4 +1,5 @@
 #include "Communicator.h"
+#include "RequestHandlerFactory.h"
 #include "LoginRequestHandler.h"
 #include <iostream>
 #include <thread>
@@ -11,7 +12,7 @@
 
 #pragma comment(lib, "Ws2_32.lib")
 
-Communicator::Communicator()
+Communicator::Communicator(RequestHandlerFactory* factory) : m_handlerFactory(factory)
 {
     WSAData wsaData;
     if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
@@ -68,8 +69,7 @@ void Communicator::startHandleRequests()
         }
         std::cout << "Client connected!" << std::endl;
 
-        IRequestHandler* handler = new LoginRequestHandler();
-
+        IRequestHandler* handler = m_handlerFactory->createLoginRequestHandler();
         // --- LOCK BEFORE ADDING TO MAP ---
         {
             std::lock_guard<std::mutex> lock(m_clientsMutex);
