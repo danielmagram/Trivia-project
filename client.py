@@ -8,6 +8,8 @@ SERVER_PORT = 1111
 LOGIN_CODE = 202
 SIGNUP_CODE = 33
 
+## need to print full response from server, not just status code
+
 
 def send_request(sock, code, payload_dict):
     json_str = json.dumps(payload_dict)
@@ -21,50 +23,56 @@ def send_request(sock, code, payload_dict):
 
 
 def receive_response(sock):
-    code = sock.recv(1)
+    code_byte = sock.recv(1)
+    if not code_byte:
+        return None
+
+    code = struct.unpack('B', code_byte)[0]
+
     size_bytes = sock.recv(4)
+    if not size_bytes:
+        return None
+
     size = struct.unpack('!I', size_bytes)[0]
 
-    data = b''
-    while len(data) < size:
-        chunk = sock.recv(size - len(data))
+    json_bytes = b''
+    while len(json_bytes) < size:
+        chunk = sock.recv(size - len(json_bytes))
         if not chunk:
-            raise Exception("Disconnected")
-        data += chunk
+            return None
+        json_bytes += chunk
 
-    json_data = json.loads(data.decode())
-    return json_data
+    json_str = json_bytes.decode()
+    response_dict = json.loads(json_str)
 
+    return {"code": code, "data": response_dict}
 
 def main():
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        s.connect((SERVER_HOST, SERVER_PORT))
-        print("Connected to server.")
+## tries the 4 cases mentioned above, and prints the server response for each case
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
 
-        while True:
-            choice = input("login / signup / exit: ").lower()
+        sock.connect((SERVER_HOST, SERVER_PORT))
 
-            if choice == "exit":
-                break
+        send_request(sock, SIGNUP_CODE, {"username": "", "password": "pass2"})
+        response = receive_response(sock)
+        print("Signup with empty username:", response)    
 
-            username = input("username: ")
-            password = input("password: ")
+        send_request(sock, SIGNUP_CODE, {"username": "user1", "password": "pass1"})
+        response = receive_response(sock)
+        print("Signup with existing username:", response)
 
-            if choice == "login":
-                payload = {"username": username, "password": password}
-                send_request(s, LOGIN_CODE, payload)
+        send_request(sock, LOGIN_CODE, {"username": "user24234", "password": "pass1"})
+        response = receive_response(sock)
+        print("Login without registration:", response)
 
-            elif choice == "signup":
-                mail = input("email: ")
-                payload = {"username": username, "password": password, "email": mail}
-                send_request(s, SIGNUP_CODE, payload)
+        send_request(sock, LOGIN_CODE, {"username": "user1", "password": "pass1"})
+        response = receive_response(sock)
+        print("Login with correct credentials:", response)
 
-            else:
-                print("Invalid option")
-                continue
+        send_request(sock, LOGIN_CODE, {"username": "user1", "password": "pass1"})
+        response = receive_response(sock)
+        print("Login while already logged in:", response)
 
-            response = receive_response(s)
-            print("Server response:", response)
 
 
 if __name__ == "__main__":
