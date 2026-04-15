@@ -11,9 +11,9 @@ public:
     virtual ~SqliteDatabase();
     virtual bool open() override;
     virtual bool close() override;
-    virtual bool doesUserExist(std::string username) override;
-    virtual bool doesPasswordMatch(std::string username, std::string password) override;
-    virtual bool addNewUser(std::string username, std::string password, std::string email) override;
+    virtual bool doesUserExist(const std::string& username) override;
+    virtual bool doesPasswordMatch(const std::string& username, const std::string& password) override;
+    virtual bool addNewUser(const std::string& username, const std::string& password, const std::string& email) override;
 private:
     sqlite3* m_db;
 };

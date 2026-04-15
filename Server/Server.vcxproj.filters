@@ -71,9 +71,6 @@
     <ClCompile Include="..\JsonResponsePacketSerializer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\Serailizercheck.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\LoginRequestHandler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

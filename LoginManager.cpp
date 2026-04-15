@@ -1,8 +1,8 @@
 #include "LoginManager.h"
 
-#define DB_FAILED -1
-#define WRONG_PARAMETERS 0
-#define SUCCESS 1
+constexpr int DB_FAILED = -1;
+constexpr int WRONG_PARAMETERS = 0;
+constexpr int SUCCESS = 1;
 LoginManager::LoginManager(IDatabase* db)
     : m_database(db)
 {

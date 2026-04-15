@@ -7,6 +7,6 @@ public:
     MenuRequestHandler() = default;
     ~MenuRequestHandler() = default;
 
-    bool isRequestRelevant(RequestInfo info) override;
-    RequestResult handleRequest(RequestInfo info) override;
+    bool isRequestRelevant(const RequestInfo& info) const override;
+    RequestResult handleRequest(const RequestInfo& info) override;
 };

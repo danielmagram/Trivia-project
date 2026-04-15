@@ -47,7 +47,7 @@ bool SqliteDatabase::close()
 	}
 	return true;
 }
-bool SqliteDatabase::doesUserExist(std::string username)
+bool SqliteDatabase::doesUserExist(const std::string& username)
 {
 	sqlite3_stmt* stmt = nullptr;
 
@@ -57,7 +57,7 @@ bool SqliteDatabase::doesUserExist(std::string username)
 		std::cerr << "Failed to prepare statement: " << sqlite3_errmsg(m_db) << std::endl;
 	}
 
-	if (sqlite3_bind_text(stmt, 1, username.c_str(), -1, SQLITE_TRANSIENT))
+	if (sqlite3_bind_text(stmt, 1, username.c_str(), -1, SQLITE_TRANSIENT)!=SQLITE_OK)
 	{
 		sqlite3_finalize(stmt);
 		throw std::runtime_error("Bind username failed: " + std::string(sqlite3_errmsg(m_db)));
@@ -75,14 +75,14 @@ bool SqliteDatabase::doesUserExist(std::string username)
 	sqlite3_finalize(stmt);
 	return false;
 }
-bool SqliteDatabase::doesPasswordMatch(std::string username, std::string password)
+bool SqliteDatabase::doesPasswordMatch(const std::string& username, const std::string& password)
 {
 	sqlite3_stmt* stmt = nullptr;
 
 	std::string sql = "SELECT 1 FROM USERS WHERE USERNAME = ? AND PASSWORD = ? ;";
 
 	if (sqlite3_prepare_v2(m_db, sql.c_str(), -1, &stmt, nullptr) != SQLITE_OK) {
-		std::cerr << "Failed to prepare statement: " << sqlite3_errmsg(m_db) << std::endl;
+		throw std::runtime_error("Failed to prepare statement: " + std::string(sqlite3_errmsg(m_db)));
 	}
 
 	if (sqlite3_bind_text(stmt, 1, username.c_str(), -1, SQLITE_TRANSIENT) != SQLITE_OK) {
@@ -107,7 +107,7 @@ bool SqliteDatabase::doesPasswordMatch(std::string username, std::string passwor
 	sqlite3_finalize(stmt);
 	return false;
 }
-bool SqliteDatabase::addNewUser(std::string username, std::string password, std::string email)
+bool SqliteDatabase::addNewUser(const std::string& username, const std::string& password, const std::string& email)
 {
 	std::string sql = "INSERT INTO USERS (USERNAME, PASSWORD, EMAIL) VALUES (?, ?, ?);";
 	sqlite3_stmt* stmt = nullptr;

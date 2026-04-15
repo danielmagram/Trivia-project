@@ -71,22 +71,10 @@ def main():
     run_test("--- Test 5: Normal Login (Logging in with " + username + ") ---", 
              LOGIN_CODE, {"username": username, "password": "Password1!"})
 
-    # 6. Test Double Login
-    print("--- Test 6: Double Login (Logging in twice at the same time) ---")
-    sock1 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock2 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    # 6. user cant login if already logged in
+    run_test("--- Test 6: Login while already logged in (Trying to login with " + username + " again) ---", 
+             LOGIN_CODE, {"username": username, "password": "Password1!"})
     
-    sock1.connect((SERVER_IP, SERVER_PORT))
-    send_request(sock1, LOGIN_CODE, {"username": username, "password": "Password1!"})
-    print("User 1 Response:", receive_response(sock1))
-    
-    # While sock1 is still connected, sock2 tries to login as the same user
-    sock2.connect((SERVER_IP, SERVER_PORT))
-    send_request(sock2, LOGIN_CODE, {"username": username, "password": "Password1!"})
-    print("User 2 Response:", receive_response(sock2), "\n")
-    
-    sock1.close()
-    sock2.close()
 
 if __name__ == "__main__":
     main()

@@ -5,27 +5,34 @@
 #include "JsonRequestPacketDeserializer.h"
 #include "JsonResponsePacketSerializer.h"
 
+
+constexpr int LOGIN_REQUEST_ID = 202;
+constexpr int SIGNUP_REQUEST_ID = 33;
+constexpr int LOGIN_SUCCESS_STATUS = 1;
+constexpr int SIGNUP_SUCCESS_STATUS = 1;
+
+
 LoginRequestHandler::LoginRequestHandler(RequestHandlerFactory& factory) : m_handlerFactory(factory)
 {
 }
 
-bool LoginRequestHandler::isRequestRelevant(RequestInfo info)
+bool LoginRequestHandler::isRequestRelevant(const RequestInfo& info) const
 {
-    return (info.id == 202 || info.id == 33);
+    return (info.id == LOGIN_REQUEST_ID || info.id == SIGNUP_REQUEST_ID);
 }
 
-RequestResult LoginRequestHandler::handleRequest(RequestInfo info)
+RequestResult LoginRequestHandler::handleRequest(const RequestInfo& info)
 {
     RequestResult result;
     result.newHandler = nullptr;
 
     try
     {
-        if (info.id == 202) // LOGIN
+        if (info.id == LOGIN_REQUEST_ID) // LOGIN
         {
             return login(info); 
         }
-        else if (info.id == 33) // SIGNUP
+        else if (info.id == SIGNUP_REQUEST_ID) // SIGNUP
         {
             return signup(info); 
         }
@@ -43,7 +50,7 @@ RequestResult LoginRequestHandler::handleRequest(RequestInfo info)
 
 
 
-RequestResult LoginRequestHandler::login(RequestInfo info)
+RequestResult LoginRequestHandler::login(const RequestInfo& info)
 {
     RequestResult result;
     LoginRequest req = JsonRequestPacketDeserializer::deserializeLoginRequest(info.buffer);
@@ -51,9 +58,9 @@ RequestResult LoginRequestHandler::login(RequestInfo info)
     LoginStatus status = m_handlerFactory.getLoginManager().login(req.username, req.password);
 
     LoginResponse res;
-    if (status.status == 1) // SUCCESS 
+    if (status.status == LOGIN_SUCCESS_STATUS) // SUCCESS 
     {
-        res.status = 1;
+        res.status = LOGIN_SUCCESS_STATUS;
         result.response = JsonResponsePacketSerializer::serializeLoginResponse(res);
         result.newHandler = m_handlerFactory.createMenuRequestHandler();
     }
@@ -66,7 +73,7 @@ RequestResult LoginRequestHandler::login(RequestInfo info)
     return result;
 }
 
-RequestResult LoginRequestHandler::signup(RequestInfo info)
+RequestResult LoginRequestHandler::signup(const RequestInfo& info)
 {
     RequestResult result;
     SignupRequest req = JsonRequestPacketDeserializer::deserializeSignUpRequest(info.buffer);
@@ -74,9 +81,9 @@ RequestResult LoginRequestHandler::signup(RequestInfo info)
     SignUpStatus status = m_handlerFactory.getLoginManager().signup(req.username, req.password, req.email);
 
     SignupResponse res;
-    if (status.status == 1) // SUCCESS
+    if (status.status == SIGNUP_SUCCESS_STATUS) // SUCCESS
     {
-        res.status = 1;
+        res.status = SIGNUP_SUCCESS_STATUS;
         result.response = JsonResponsePacketSerializer::serializeSignupResponse(res);
         result.newHandler = m_handlerFactory.createMenuRequestHandler();
     }
