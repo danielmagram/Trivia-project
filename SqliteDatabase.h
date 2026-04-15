@@ -7,7 +7,8 @@
 class SqliteDatabase : public IDatabase
 {
 public:
-    virtual ~SqliteDatabase() = default;
+    SqliteDatabase();
+    virtual ~SqliteDatabase();
     virtual bool open() override;
     virtual bool close() override;
     virtual bool doesUserExist(std::string username) override;
