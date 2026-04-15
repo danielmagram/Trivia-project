@@ -1,10 +1,11 @@
 #include "RequestHandlerFactory.h"
 #include "LoginRequestHandler.h"
 #include "MenuRequestHandler.h"
+#include "SqliteDatabase.h"
 
-RequestHandlerFactory::RequestHandlerFactory() : m_database(nullptr)
+RequestHandlerFactory::RequestHandlerFactory()
+    : m_database(new SqliteDatabase()), m_loginManager(m_database)
 {
-	// will create the database in the future, for now we can leave it as nullptr
 }
 
 RequestHandlerFactory::~RequestHandlerFactory()

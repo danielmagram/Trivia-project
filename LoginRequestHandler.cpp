@@ -1,6 +1,7 @@
 #include "LoginRequestHandler.h"
 #include "RequestHandlerFactory.h"
 #include "MenuRequestHandler.h"
+#include "LoginManager.h" 
 #include "JsonRequestPacketDeserializer.h"
 #include "JsonResponsePacketSerializer.h"
 
@@ -41,15 +42,16 @@ RequestResult LoginRequestHandler::handleRequest(RequestInfo info)
 }
 
 
+
 RequestResult LoginRequestHandler::login(RequestInfo info)
 {
     RequestResult result;
     LoginRequest req = JsonRequestPacketDeserializer::deserializeLoginRequest(info.buffer);
 
-    bool success = m_handlerFactory.getLoginManager().login(req.username, req.password);
+    LoginStatus status = m_handlerFactory.getLoginManager().login(req.username, req.password);
 
     LoginResponse res;
-    if (success)
+    if (status.status == 1) // SUCCESS 
     {
         res.status = 1;
         result.response = JsonResponsePacketSerializer::serializeLoginResponse(res);
@@ -57,7 +59,7 @@ RequestResult LoginRequestHandler::login(RequestInfo info)
     }
     else
     {
-        res.status = 0;
+		res.status = status.status; // Pass the specific error code back to the client
         result.response = JsonResponsePacketSerializer::serializeLoginResponse(res);
         result.newHandler = m_handlerFactory.createLoginRequestHandler();
     }
@@ -69,10 +71,10 @@ RequestResult LoginRequestHandler::signup(RequestInfo info)
     RequestResult result;
     SignupRequest req = JsonRequestPacketDeserializer::deserializeSignUpRequest(info.buffer);
 
-    bool success = m_handlerFactory.getLoginManager().signup(req.username, req.password, req.email);
+    SignUpStatus status = m_handlerFactory.getLoginManager().signup(req.username, req.password, req.email);
 
     SignupResponse res;
-    if (success)
+    if (status.status == 1) // SUCCESS
     {
         res.status = 1;
         result.response = JsonResponsePacketSerializer::serializeSignupResponse(res);
@@ -80,7 +82,7 @@ RequestResult LoginRequestHandler::signup(RequestInfo info)
     }
     else
     {
-        res.status = 0;
+        res.status = status.status;
         result.response = JsonResponsePacketSerializer::serializeSignupResponse(res);
         result.newHandler = m_handlerFactory.createLoginRequestHandler();
     }

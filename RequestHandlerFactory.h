@@ -18,6 +18,6 @@ public:
     LoginManager& getLoginManager();
 
 private:
-    LoginManager m_loginManager;
     IDatabase* m_database;
+    LoginManager m_loginManager;
 };

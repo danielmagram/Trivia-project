@@ -128,6 +128,8 @@
     <ClInclude Include="..\json.hpp" />
     <ClInclude Include="..\JsonRequestPacketDeserializer.h" />
     <ClInclude Include="..\JsonResponsePacketSerializer.h" />
+    <ClInclude Include="..\MenuRequestHandler.h" />
+    <ClInclude Include="..\RequestHandlerFactory.h" />
     <ClInclude Include="..\Server.h" />
     <ClInclude Include="..\LoginRequestHandler.h" />
     <ClInclude Include="..\Communicator.h" />
@@ -138,6 +140,7 @@
     <ClCompile Include="..\JsonResponsePacketSerializer.cpp" />
     <ClCompile Include="..\LoginRequestHandler.cpp" />
     <ClCompile Include="..\main.cpp" />
+    <ClCompile Include="..\RequestHandlerFactory.cpp" />
     <ClCompile Include="..\Serailizercheck.cpp" />
     <ClCompile Include="..\Server.cpp" />
   </ItemGroup>
