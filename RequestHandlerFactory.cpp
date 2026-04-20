@@ -16,15 +16,14 @@ RequestHandlerFactory::~RequestHandlerFactory()
     }
 }
 
-LoginRequestHandler* RequestHandlerFactory::createLoginRequestHandler()
+IRequestHandler* RequestHandlerFactory::createLoginRequestHandler()
 {
-	// we pass the factory to the handler so it can create new handlers when needed, and access the login manager
-    return new LoginRequestHandler(*this);
+	return new LoginRequestHandler(*this); // Interface instead of concrete class
 }
 
-MenuRequestHandler* RequestHandlerFactory::createMenuRequestHandler()
+IRequestHandler* RequestHandlerFactory::createMenuRequestHandler()
 {
-    return new MenuRequestHandler();
+    return new MenuRequestHandler(*this);
 }
 
 LoginManager& RequestHandlerFactory::getLoginManager()
