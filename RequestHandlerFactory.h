@@ -1,19 +1,16 @@
 #pragma once
 #include "LoginManager.h" 
 #include "IDatabase.h"   
-
-// Forward declarations - because of circular dependencies between the factory and the handlers
-class LoginRequestHandler;
-class MenuRequestHandler;
-
+#include "IRequestHandler.h" 
 class RequestHandlerFactory
 {
 public:
     RequestHandlerFactory();
     ~RequestHandlerFactory();
 
-    LoginRequestHandler* createLoginRequestHandler();
-    MenuRequestHandler* createMenuRequestHandler();
+    // The return types must be the Base Interface!
+    IRequestHandler* createLoginRequestHandler();
+    IRequestHandler* createMenuRequestHandler();
 
     LoginManager& getLoginManager();
 
