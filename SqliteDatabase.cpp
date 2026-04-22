@@ -57,7 +57,7 @@ bool SqliteDatabase::doesUserExist(const std::string& username)
 		std::cerr << "Failed to prepare statement: " << sqlite3_errmsg(m_db) << std::endl;
 	}
 
-	if (sqlite3_bind_text(stmt, 1, username.c_str(), -1, SQLITE_TRANSIENT)!=SQLITE_OK)
+	if (sqlite3_bind_text(stmt, 1, username.c_str(), -1, SQLITE_STATIC)!=SQLITE_OK)
 	{
 		sqlite3_finalize(stmt);
 		throw std::runtime_error("Bind username failed: " + std::string(sqlite3_errmsg(m_db)));
@@ -85,12 +85,12 @@ bool SqliteDatabase::doesPasswordMatch(const std::string& username, const std::s
 		throw std::runtime_error("Failed to prepare statement: " + std::string(sqlite3_errmsg(m_db)));
 	}
 
-	if (sqlite3_bind_text(stmt, 1, username.c_str(), -1, SQLITE_TRANSIENT) != SQLITE_OK) {
+	if (sqlite3_bind_text(stmt, 1, username.c_str(), -1, SQLITE_STATIC) != SQLITE_OK) {
 		sqlite3_finalize(stmt);
 		throw std::runtime_error("Bind username failed: " + std::string(sqlite3_errmsg(m_db)));
 	}
 
-	if (sqlite3_bind_text(stmt, 2, password.c_str(), -1, SQLITE_TRANSIENT) != SQLITE_OK) {
+	if (sqlite3_bind_text(stmt, 2, password.c_str(), -1, SQLITE_STATIC) != SQLITE_OK) {
 		sqlite3_finalize(stmt);
 		throw std::runtime_error("Bind password failed: " + std::string(sqlite3_errmsg(m_db)));
 	}
@@ -117,17 +117,17 @@ bool SqliteDatabase::addNewUser(const std::string& username, const std::string& 
 		throw std::runtime_error("Failed to prepare statment: " + std::string(sqlite3_errmsg(m_db)));
 	}
 
-	if (sqlite3_bind_text(stmt, 1, username.c_str(), -1, SQLITE_TRANSIENT) != SQLITE_OK) {
+	if (sqlite3_bind_text(stmt, 1, username.c_str(), -1, SQLITE_STATIC) != SQLITE_OK) {
 		sqlite3_finalize(stmt);
 		throw std::runtime_error("Bind username failed: " + std::string(sqlite3_errmsg(m_db)));
 	}
 
-	if (sqlite3_bind_text(stmt, 2, password.c_str(), -1, SQLITE_TRANSIENT) != SQLITE_OK) {
+	if (sqlite3_bind_text(stmt, 2, password.c_str(), -1, SQLITE_STATIC) != SQLITE_OK) {
 		sqlite3_finalize(stmt);
 		throw std::runtime_error("Bind password failed: " + std::string(sqlite3_errmsg(m_db)));
 	}
 
-	if (sqlite3_bind_text(stmt, 3, email.c_str(), -1, SQLITE_TRANSIENT) != SQLITE_OK) {
+	if (sqlite3_bind_text(stmt, 3, email.c_str(), -1, SQLITE_STATIC) != SQLITE_OK) {
 		sqlite3_finalize(stmt);
 		throw std::runtime_error("Bind email failed: " + std::string(sqlite3_errmsg(m_db)));
 	}

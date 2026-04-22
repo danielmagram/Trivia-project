@@ -5,7 +5,6 @@
 #include <thread>
 #include <memory>
 #include "JsonResponsePacketSerializer.h"
-#include <ws2tcpip.h>
 #include <cstring>
 #include <chrono>
 
