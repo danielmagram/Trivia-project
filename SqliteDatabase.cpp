@@ -1,5 +1,5 @@
 #include "SqliteDatabase.h"
-
+#include <algorithm>
 
 SqliteDatabase::SqliteDatabase()
 	: m_db(nullptr)
@@ -46,8 +46,30 @@ bool SqliteDatabase::open()
 		ANS3 TEXT NOT NULL,
 		ANS4 TEXT NOT NULL
 		);)";
-		sqlite3_exec(m_db, sqlQuestionsStatement, nullptr, nullptr, &errMessage);
+		char* errMessage2 = nullptr;
+		if (sqlite3_exec(m_db, sqlQuestionsStatement, nullptr, nullptr, &errMessage2) != SQLITE_OK) {
+			std::cerr << "Failed to create QUESTIONS table: " << errMessage2 << std::endl;
+			sqlite3_free(errMessage2);
+			return false;
+		}	
+
+		const char* sqlStatsStatement = R"(CREATE TABLE IF NOT EXISTS STATISTICS (
+    USERNAME TEXT PRIMARY KEY,
+    GAMES_PLAYED INTEGER DEFAULT 0,
+    TOTAL_ANSWERS INTEGER DEFAULT 0,
+    CORRECT_ANSWERS INTEGER DEFAULT 0,
+    AVERAGE_ANSWER_TIME REAL DEFAULT 0.0
+    );
+)";
+
+		char* errMessage3 = nullptr;
+		if (sqlite3_exec(m_db, sqlStatsStatement, nullptr, nullptr, &errMessage3) != SQLITE_OK) {
+			std::cerr << "Failed to create STATISTICS table: " << errMessage3 << std::endl;
+			sqlite3_free(errMessage3);
+			return false;
+		}
 	}
+
 	return true;
 }
 bool SqliteDatabase::close()
@@ -179,4 +201,142 @@ std::list<Question> SqliteDatabase::getQuestions(int count)
 
 	sqlite3_finalize(stmt);
 	return questions;
+}
+
+float SqliteDatabase::getPlayerAverageAnswerTime(const std::string& username)
+{
+	float avgTime = 0.0f;
+	std::string sql = "SELECT AVERAGE_ANSWER_TIME FROM STATISTICS WHERE USERNAME = ?;";
+	sqlite3_stmt* stmt = nullptr;
+
+	if (sqlite3_prepare_v2(m_db, sql.c_str(), -1, &stmt, nullptr) == SQLITE_OK) {
+		sqlite3_bind_text(stmt, 1, username.c_str(), -1, SQLITE_STATIC);
+		if (sqlite3_step(stmt) == SQLITE_ROW) {
+			avgTime = static_cast<float>(sqlite3_column_double(stmt, 0));
+		}
+	}
+	sqlite3_finalize(stmt);
+	return avgTime;
+}
+
+int SqliteDatabase::getNumOfCorrectAnswers(const std::string& username)
+{
+	int correctAnswers = 0;
+	std::string sql = "SELECT CORRECT_ANSWERS FROM STATISTICS WHERE USERNAME = ?;";
+	sqlite3_stmt* stmt = nullptr;
+
+	if (sqlite3_prepare_v2(m_db, sql.c_str(), -1, &stmt, nullptr) == SQLITE_OK) {
+		sqlite3_bind_text(stmt, 1, username.c_str(), -1, SQLITE_STATIC);
+		if (sqlite3_step(stmt) == SQLITE_ROW) {
+			correctAnswers = sqlite3_column_int(stmt, 0);
+		}
+	}
+	sqlite3_finalize(stmt);
+	return correctAnswers;
+}
+
+int SqliteDatabase::getNumOfTotalAnswers(const std::string& username)
+{
+	int totalAnswers = 0;
+	std::string sql = "SELECT TOTAL_ANSWERS FROM STATISTICS WHERE USERNAME = ?;";
+	sqlite3_stmt* stmt = nullptr;
+
+	if (sqlite3_prepare_v2(m_db, sql.c_str(), -1, &stmt, nullptr) == SQLITE_OK) {
+		sqlite3_bind_text(stmt, 1, username.c_str(), -1, SQLITE_STATIC);
+		if (sqlite3_step(stmt) == SQLITE_ROW) {
+			totalAnswers = sqlite3_column_int(stmt, 0);
+		}
+	}
+	sqlite3_finalize(stmt);
+	return totalAnswers;
+}
+
+int SqliteDatabase::getNumOfPlayerGames(const std::string& username)
+{
+	int gamesPlayed = 0;
+	std::string sql = "SELECT GAMES_PLAYED FROM STATISTICS WHERE USERNAME = ?;";
+	sqlite3_stmt* stmt = nullptr;
+
+	if (sqlite3_prepare_v2(m_db, sql.c_str(), -1, &stmt, nullptr) == SQLITE_OK) {
+		sqlite3_bind_text(stmt, 1, username.c_str(), -1, SQLITE_STATIC);
+		if (sqlite3_step(stmt) == SQLITE_ROW) {
+			gamesPlayed = sqlite3_column_int(stmt, 0);
+		}
+	}
+	sqlite3_finalize(stmt);
+	return gamesPlayed;
+}
+
+void SqliteDatabase::initUserStatistics(const std::string& username)
+{
+	std::string sql = "INSERT INTO STATISTICS (USERNAME, GAMES_PLAYED, TOTAL_ANSWERS, CORRECT_ANSWERS, AVERAGE_ANSWER_TIME) VALUES (?, 0, 0, 0, 0.0);";
+	sqlite3_stmt* stmt = nullptr;
+
+	if (sqlite3_prepare_v2(m_db, sql.c_str(), -1, &stmt, nullptr) == SQLITE_OK) {
+		sqlite3_bind_text(stmt, 1, username.c_str(), -1, SQLITE_STATIC);
+
+		if (sqlite3_step(stmt) != SQLITE_DONE) {
+			std::cerr << "Failed to initialize statistics for user: " << username << std::endl;
+		}
+	}
+	else {
+		std::cerr << "Failed to prepare initUserStatistics statement" << std::endl;
+	}
+
+	sqlite3_finalize(stmt);
+}
+
+float SqliteDatabase::getPlayerScore(const std::string& username)
+{
+	float score = 0.0f; 
+	std::string sql = "SELECT CORRECT_ANSWERS, AVERAGE_ANSWER_TIME FROM STATISTICS WHERE USERNAME = ?;";
+	sqlite3_stmt* stmt = nullptr;
+
+	if (sqlite3_prepare_v2(m_db, sql.c_str(), -1, &stmt, nullptr) == SQLITE_OK) {
+		sqlite3_bind_text(stmt, 1, username.c_str(), -1, SQLITE_STATIC);
+
+		if (sqlite3_step(stmt) == SQLITE_ROW) {
+			int correctAnswers = sqlite3_column_int(stmt, 0);
+			float avgTime = static_cast<float>(sqlite3_column_double(stmt, 1));
+
+			if (avgTime > 0) {
+				score = (correctAnswers * 1000) / avgTime;
+			}
+		}
+	}
+	sqlite3_finalize(stmt);
+	return score;
+}
+
+std::vector<std::string> SqliteDatabase::getHighScores()
+{
+	std::vector<std::pair<std::string, float>> playerScores;
+	std::string sql = "SELECT USERNAME FROM STATISTICS;";
+	sqlite3_stmt* stmt = nullptr;
+	// 1. First, we retrieve all usernames and their scores
+	if (sqlite3_prepare_v2(m_db, sql.c_str(), -1, &stmt, nullptr) == SQLITE_OK) {
+		while (sqlite3_step(stmt) == SQLITE_ROW) {
+			std::string username = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
+			float score = getPlayerScore(username); 
+
+			playerScores.push_back({ username, score });
+		}
+	}
+	sqlite3_finalize(stmt);
+
+	// 2. Then, we sort the players by their scores in descending order
+	std::sort(playerScores.begin(), playerScores.end(),
+		[](const std::pair<std::string, float>& a, const std::pair<std::string, float>& b) {
+			return a.second > b.second;
+		});
+
+	// 3. Finally, we format the top 5 scores for display 
+	std::vector<std::string> topScores;
+	for (size_t i = 0; i < playerScores.size() && i < 5; ++i) {
+		// Format: "Username: Score"
+		std::string formattedScore = playerScores[i].first + ": " + std::to_string(playerScores[i].second);
+		topScores.push_back(formattedScore);
+	}
+
+	return topScores;
 }
