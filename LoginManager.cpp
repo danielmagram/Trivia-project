@@ -14,12 +14,19 @@ SignUpStatus LoginManager::signup(const std::string& username, const std::string
     {
         return { WRONG_PARAMETERS };
     }
+
     try
     {
         if (m_database->doesUserExist(username))
             return { WRONG_PARAMETERS };
+
         if (m_database->addNewUser(username, password, email))
+        {
+            m_database->initUserStatistics(username);
             return { SUCCESS };
+        }
+
+        return { DB_FAILED };
     }
     catch (const std::exception& e)
     {

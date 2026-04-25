@@ -27,6 +27,11 @@ data = response.json()
 
 # 3. Parse the JSON and insert into the database
 if data['response_code'] == 0:
+    
+    print("Clearing old questions from the database...")
+    cursor.execute('DELETE FROM QUESTIONS')
+    cursor.execute("DELETE FROM sqlite_sequence WHERE name='QUESTIONS'")
+    
     for item in data['results']:
         question = html.unescape(item['question'])
         correct = html.unescape(item['correct_answer'])
@@ -40,8 +45,8 @@ if data['response_code'] == 0:
         print(f"Added: {question}")
 
     conn.commit()
-    print("\n Successfully inserted 10 questions into the database!")
+    print("\nSuccessfully inserted 10 questions into the database!")
 else:
-    print(" Failed to fetch questions from the API.")
+    print("Failed to fetch questions from the API.")
 
 conn.close()
