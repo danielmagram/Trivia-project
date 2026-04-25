@@ -141,6 +141,7 @@
     <ClInclude Include="..\Communicator.h" />
     <ClInclude Include="..\sqlite3.h" />
     <ClInclude Include="..\SqliteDatabase.h" />
+    <ClInclude Include="..\StatisticsManager.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Communicator.cpp" />
@@ -158,6 +159,7 @@
     <ClCompile Include="..\Server.cpp" />
     <ClCompile Include="..\sqlite3.c" />
     <ClCompile Include="..\SqliteDatabase.cpp" />
+    <ClCompile Include="..\StatisticsManager.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
