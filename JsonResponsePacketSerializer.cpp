@@ -5,6 +5,9 @@ using json = nlohmann::json;
 constexpr unsigned char ERROR_CODE = 40;
 constexpr unsigned char LOGIN_CODE = 202;
 constexpr unsigned char SIGNUP_CODE = 33;
+constexpr unsigned char LOGOUT_CODE = 203;
+constexpr unsigned char JOIN_ROOM_CODE = 100;
+constexpr unsigned char CREATE_ROOM_CODE = 100;
 constexpr unsigned char GET_ROOMS_CODE = 101;
 constexpr unsigned char GET_HIGHSCORE_CODE = 140;
 constexpr unsigned char GET_PERSONAL_STATS_CODE = 150;
@@ -58,40 +61,37 @@ std::vector<unsigned char> JsonResponsePacketSerializer::serializeResponse(const
     json j;
     j["status"] = response.status;
 
-    return buildPacket(SIGNUP_CODE, j);
+    return buildPacket(LOGOUT_CODE, j);
 }
-// fix for rooms data
+
 std::vector<unsigned char> JsonResponsePacketSerializer::serializeResponse(const GetRoomsResponse& response)
 {
     json j;
-    std::string roomsString = "";
+    j["status"] = response.status; 
 
-    for (size_t i = 0; i < response.rooms.size(); ++i) {
-        roomsString += response.rooms[i].name;
-        if (i < response.rooms.size() - 1) {
-            roomsString += ", ";
-        }
+    json roomsArray = json::array(); 
+
+    for (const auto& room : response.rooms) {
+        json roomJson;
+
+        roomJson["id"] = room.id;
+        roomJson["name"] = room.name;
+        roomJson["maxPlayers"] = room.maxPlayers;
+        roomJson["numOfQuestionsInGame"] = room.numOfQuestionsInGame;
+        roomJson["timePerQuestion"] = room.timePerQuestion;
+        roomJson["isActive"] = room.status;
+
+        roomsArray.push_back(roomJson);
     }
 
-    j["Rooms"] = roomsString;
+    j["Rooms"] = roomsArray;
 
     return buildPacket(GET_ROOMS_CODE, j);
 }
-
 std::vector<unsigned char> JsonResponsePacketSerializer::serializeResponse(const GetPlayersInRoomResponse& response)
 {
     json j;
-    std::string playersString = "";
-
-    for (size_t i = 0; i < response.players.size(); ++i) {
-        playersString += response.players[i];
-        if (i < response.players.size() - 1) {
-            playersString += ", ";
-        }
-    }
-
-    j["PlayersInRoom"] = playersString;
-
+    j["PlayersInRoom"] = response.players;
     return buildPacket(GET_PLAYERS_CODE, j);
 }
 
@@ -100,7 +100,7 @@ std::vector<unsigned char> JsonResponsePacketSerializer::serializeResponse(const
     json j;
     j["status"] = response.status;
 
-    return buildPacket(SIGNUP_CODE, j);
+    return buildPacket(JOIN_ROOM_CODE, j);
 }
 
 std::vector<unsigned char> JsonResponsePacketSerializer::serializeResponse(const CreateRoomResponse& response)
@@ -108,7 +108,7 @@ std::vector<unsigned char> JsonResponsePacketSerializer::serializeResponse(const
     json j;
     j["status"] = response.status;
 
-    return buildPacket(SIGNUP_CODE, j);
+    return buildPacket(CREATE_ROOM_CODE, j);
 }
 
 std::vector<unsigned char> JsonResponsePacketSerializer::serializeResponse(const GetHighScoreResponse& response)
