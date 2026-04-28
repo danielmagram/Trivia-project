@@ -2,16 +2,19 @@
 #include "json.hpp" 
 using json = nlohmann::json;
 
-constexpr unsigned char ERROR_CODE = 40;
-constexpr unsigned char LOGIN_CODE = 202;
-constexpr unsigned char SIGNUP_CODE = 33;
-constexpr unsigned char LOGOUT_CODE = 203;
-constexpr unsigned char JOIN_ROOM_CODE = 100;
-constexpr unsigned char CREATE_ROOM_CODE = 100;
-constexpr unsigned char GET_ROOMS_CODE = 101;
-constexpr unsigned char GET_HIGHSCORE_CODE = 140;
-constexpr unsigned char GET_PERSONAL_STATS_CODE = 150;
-constexpr unsigned char GET_PLAYERS_CODE = 102;
+enum CODES : unsigned char {
+    ERROR_CODE = 40,
+    LOGIN_CODE = 202,
+    SIGNUP_CODE = 33,
+    LOGOUT_CODE = 203,
+    JOIN_ROOM_CODE = 100,
+    CREATE_ROOM_CODE = 101,
+    GET_ROOMS_CODE = 102,
+    GET_HIGHSCORE_CODE = 140,
+    GET_PERSONAL_STATS_CODE = 150,
+    GET_PLAYERS_CODE = 105,
+};
+
 //HELPER FUNCTION
 std::vector<unsigned char> buildPacket(unsigned char code, const json& j)
 {
@@ -32,7 +35,7 @@ std::vector<unsigned char> buildPacket(unsigned char code, const json& j)
 }
 
 
-std::vector<unsigned char> JsonResponsePacketSerializer::serializeErrorResponse(ErrorResponse response)
+std::vector<unsigned char> JsonResponsePacketSerializer::serializeResponse(ErrorResponse response)
 {
     json j;
     j["message"] = response.message;
@@ -40,7 +43,7 @@ std::vector<unsigned char> JsonResponsePacketSerializer::serializeErrorResponse(
     return buildPacket(ERROR_CODE, j);
 }
 
-std::vector<unsigned char> JsonResponsePacketSerializer::serializeLoginResponse(LoginResponse response)
+std::vector<unsigned char> JsonResponsePacketSerializer::serializeResponse(LoginResponse response)
 {
     json j;
     j["status"] = response.status;
@@ -48,7 +51,7 @@ std::vector<unsigned char> JsonResponsePacketSerializer::serializeLoginResponse(
     return buildPacket(LOGIN_CODE, j);
 }
 
-std::vector<unsigned char> JsonResponsePacketSerializer::serializeSignupResponse(SignupResponse response)
+std::vector<unsigned char> JsonResponsePacketSerializer::serializeResponse(SignupResponse response)
 {
     json j;
     j["status"] = response.status;
