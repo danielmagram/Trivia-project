@@ -41,7 +41,7 @@ RequestResult LoginRequestHandler::handleRequest(const RequestInfo& info)
     {
         ErrorResponse err;
         err.message = "An error occurred";
-        result.response = JsonResponsePacketSerializer::serializeErrorResponse(err);
+        result.response = JsonResponsePacketSerializer::serializeResponse(err);
         result.newHandler = nullptr;
     }
 
@@ -61,13 +61,13 @@ RequestResult LoginRequestHandler::login(const RequestInfo& info)
     if (status.status == LOGIN_SUCCESS_STATUS) // SUCCESS 
     {
         res.status = LOGIN_SUCCESS_STATUS;
-        result.response = JsonResponsePacketSerializer::serializeLoginResponse(res);
-        result.newHandler = m_handlerFactory.createMenuRequestHandler();
+        result.response = JsonResponsePacketSerializer::serializeResponse(res);
+        result.newHandler = m_handlerFactory.createMenuRequestHandler(req.username);
     }
     else
     {
 		res.status = status.status; // Pass the specific error code back to the client
-        result.response = JsonResponsePacketSerializer::serializeLoginResponse(res);
+        result.response = JsonResponsePacketSerializer::serializeResponse(res);
         result.newHandler = m_handlerFactory.createLoginRequestHandler();
     }
     return result;
@@ -84,13 +84,13 @@ RequestResult LoginRequestHandler::signup(const RequestInfo& info)
     if (status.status == SIGNUP_SUCCESS_STATUS) // SUCCESS
     {
         res.status = SIGNUP_SUCCESS_STATUS;
-        result.response = JsonResponsePacketSerializer::serializeSignupResponse(res);
-        result.newHandler = m_handlerFactory.createMenuRequestHandler();
+        result.response = JsonResponsePacketSerializer::serializeResponse(res);
+        result.newHandler = m_handlerFactory.createMenuRequestHandler(req.username);
     }
     else
     {
         res.status = status.status;
-        result.response = JsonResponsePacketSerializer::serializeSignupResponse(res);
+        result.response = JsonResponsePacketSerializer::serializeResponse(res);
         result.newHandler = m_handlerFactory.createLoginRequestHandler();
     }
     return result;

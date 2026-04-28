@@ -161,7 +161,7 @@ void Communicator::handleNewClient(SOCKET clientSocket)
             {
                 ErrorResponse res;
                 res.message = "ERROR: Irrelevant Request";
-                result.response = JsonResponsePacketSerializer::serializeErrorResponse(res);
+                result.response = JsonResponsePacketSerializer::serializeResponse(res);
                 result.newHandler = handler; // Stay in current state
             }
 
