@@ -25,4 +25,5 @@ public:
 	virtual std::vector<std::string> getHighScores() override;
 private:
     sqlite3* m_db;
+    sqlite3_stmt* prepareStatement(const std::string& sql) const;
 };
