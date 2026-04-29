@@ -1,19 +1,8 @@
 #include "JsonResponsePacketSerializer.h"
 #include "json.hpp" 
+#include "Constants.h"
 using json = nlohmann::json;
 
-enum CODES : unsigned char {
-    ERROR_CODE = 40,
-    LOGIN_CODE = 202,
-    SIGNUP_CODE = 33,
-    LOGOUT_CODE = 203,
-    JOIN_ROOM_CODE = 100,
-    CREATE_ROOM_CODE = 101,
-    GET_ROOMS_CODE = 102,
-    GET_HIGHSCORE_CODE = 140,
-    GET_PERSONAL_STATS_CODE = 150,
-    GET_PLAYERS_CODE = 105,
-};
 
 //HELPER FUNCTION
 std::vector<unsigned char> buildPacket(unsigned char code, const json& j)
@@ -40,7 +29,7 @@ std::vector<unsigned char> JsonResponsePacketSerializer::serializeResponse(Error
     json j;
     j["message"] = response.message;
 
-    return buildPacket(ERROR_CODE, j);
+    return buildPacket(static_cast<unsigned char>(RequestCode::ERROR_CODE), j);
 }
 
 std::vector<unsigned char> JsonResponsePacketSerializer::serializeResponse(LoginResponse response)
@@ -48,7 +37,7 @@ std::vector<unsigned char> JsonResponsePacketSerializer::serializeResponse(Login
     json j;
     j["status"] = response.status;
 
-    return buildPacket(LOGIN_CODE, j);
+    return buildPacket(static_cast<unsigned char>(RequestCode::LOGIN), j);
 }
 
 std::vector<unsigned char> JsonResponsePacketSerializer::serializeResponse(SignupResponse response)
@@ -56,7 +45,7 @@ std::vector<unsigned char> JsonResponsePacketSerializer::serializeResponse(Signu
     json j;
     j["status"] = response.status;
 
-    return buildPacket(SIGNUP_CODE, j);
+    return buildPacket(static_cast<unsigned char>(RequestCode::SIGNUP), j);
 }
 
 std::vector<unsigned char> JsonResponsePacketSerializer::serializeResponse(const LogoutResponse& response)
@@ -64,7 +53,7 @@ std::vector<unsigned char> JsonResponsePacketSerializer::serializeResponse(const
     json j;
     j["status"] = response.status;
 
-    return buildPacket(LOGOUT_CODE, j);
+    return buildPacket(static_cast<unsigned char>(RequestCode::LOGOUT), j);
 }
 
 std::vector<unsigned char> JsonResponsePacketSerializer::serializeResponse(const GetRoomsResponse& response)
@@ -89,13 +78,13 @@ std::vector<unsigned char> JsonResponsePacketSerializer::serializeResponse(const
 
     j["Rooms"] = roomsArray;
 
-    return buildPacket(GET_ROOMS_CODE, j);
+    return buildPacket(static_cast<unsigned char>(RequestCode::GET_ROOMS), j);
 }
 std::vector<unsigned char> JsonResponsePacketSerializer::serializeResponse(const GetPlayersInRoomResponse& response)
 {
     json j;
     j["PlayersInRoom"] = response.players;
-    return buildPacket(GET_PLAYERS_CODE, j);
+    return buildPacket(static_cast<unsigned char>(RequestCode::GET_PLAYERS), j);
 }
 
 std::vector<unsigned char> JsonResponsePacketSerializer::serializeResponse(const JoinRoomResponse& response)
@@ -103,7 +92,7 @@ std::vector<unsigned char> JsonResponsePacketSerializer::serializeResponse(const
     json j;
     j["status"] = response.status;
 
-    return buildPacket(JOIN_ROOM_CODE, j);
+    return buildPacket(static_cast<unsigned char>(RequestCode::JOIN_ROOM), j);
 }
 
 std::vector<unsigned char> JsonResponsePacketSerializer::serializeResponse(const CreateRoomResponse& response)
@@ -111,7 +100,7 @@ std::vector<unsigned char> JsonResponsePacketSerializer::serializeResponse(const
     json j;
     j["status"] = response.status;
 
-    return buildPacket(CREATE_ROOM_CODE, j);
+    return buildPacket(static_cast<unsigned char>(RequestCode::CREATE_ROOM), j);
 }
 
 std::vector<unsigned char> JsonResponsePacketSerializer::serializeResponse(const GetHighScoreResponse& response)
@@ -119,7 +108,7 @@ std::vector<unsigned char> JsonResponsePacketSerializer::serializeResponse(const
     json j;
     j["HighScores"] = response.statistics;
 
-    return buildPacket(GET_HIGHSCORE_CODE, j);
+    return buildPacket(static_cast<unsigned char>(RequestCode::GET_HIGHSCORE), j);
 }
 
 std::vector<unsigned char> JsonResponsePacketSerializer::serializeResponse(const GetPersonalStatsResponse& response)
@@ -127,5 +116,5 @@ std::vector<unsigned char> JsonResponsePacketSerializer::serializeResponse(const
     json j;
     j["UserStatistics"] = response.statistics;
 
-    return buildPacket(GET_PERSONAL_STATS_CODE, j);
+    return buildPacket(static_cast<unsigned char>(RequestCode::GET_PERSONAL_STATS), j);
 }

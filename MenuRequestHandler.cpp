@@ -4,19 +4,8 @@
 #include "JsonRequestPacketDeserializer.h"
 #include "JsonResponsePacketSerializer.h"
 #include "RoomManager.h"
+#include "Constants.h"
 
-enum CODES : unsigned char {
-    ERROR_CODE = 40,
-    LOGIN_CODE = 202,
-    SIGNUP_CODE = 33,
-    SIGNOUT_CODE = 203,
-    JOIN_ROOM_CODE = 100,
-    CREATE_ROOM_CODE = 101,
-    GET_ROOMS_CODE = 102,
-    GET_HIGHSCORE_CODE = 140,
-    GET_PERSONAL_STATS_CODE = 150,
-    GET_PLAYERS_CODE = 105,
-};
 
 
 MenuRequestHandler::MenuRequestHandler(RequestHandlerFactory& factory, std::string user) : m_handlerFactory(factory), m_user(user)
@@ -26,16 +15,16 @@ MenuRequestHandler::MenuRequestHandler(RequestHandlerFactory& factory, std::stri
 
 bool MenuRequestHandler::isRequestRelevant(const RequestInfo& info) const
 {
-    switch (info.id)
+    RequestCode code = static_cast<RequestCode>(info.id);
+    switch (code)
     {
-    case GET_ROOMS_CODE:
-    case GET_PLAYERS_CODE:
-    case JOIN_ROOM_CODE:
-    case CREATE_ROOM_CODE:
-    case GET_HIGHSCORE_CODE:
-    case GET_PERSONAL_STATS_CODE:
+    case RequestCode::GET_ROOMS:
+    case RequestCode::GET_PLAYERS:
+    case RequestCode::JOIN_ROOM:
+    case RequestCode::CREATE_ROOM:
+    case RequestCode::GET_HIGHSCORE:
+    case RequestCode::GET_PERSONAL_STATS:
         return true;
-
     default:
         return false;
     }
@@ -43,27 +32,28 @@ bool MenuRequestHandler::isRequestRelevant(const RequestInfo& info) const
 
 RequestResult MenuRequestHandler::handleRequest(const RequestInfo& info)
 {
-    switch (info.id)
+	RequestCode code = static_cast<RequestCode>(info.id);
+   switch (code)
     {
-    case SIGNOUT_CODE:
+    case RequestCode::LOGOUT:
         return signout(info);
 
-    case JOIN_ROOM_CODE:
+    case RequestCode::JOIN_ROOM:
         return joinRoom(info);
-    
-    case CREATE_ROOM_CODE:
+
+    case RequestCode::CREATE_ROOM:
         return createRoom(info);
 
-    case GET_ROOMS_CODE:
+    case RequestCode::GET_ROOMS:
         return getRooms(info);
 
-    case GET_PLAYERS_CODE:
+    case RequestCode::GET_PLAYERS:
         return getPlayersInRoom(info);
 
-    case GET_HIGHSCORE_CODE:
+    case RequestCode::GET_HIGHSCORE:
         return getHighScore(info);
 
-    case GET_PERSONAL_STATS_CODE:
+    case RequestCode::GET_PERSONAL_STATS:
         return getPersonalStats(info);
 
     default:
@@ -77,7 +67,7 @@ RequestResult MenuRequestHandler::signout(const RequestInfo& info)
 {
     LoginManager loginManager = m_handlerFactory.getLoginManager();
     LogoutResponse response;
-    response.status = 1;
+	response.status = 1; // Success
     loginManager.logout(m_user.getUsername());
     RequestResult result;
     
@@ -134,11 +124,19 @@ RequestResult MenuRequestHandler::joinRoom(const RequestInfo& info)
     RequestResult result;
     JoinRoomRequest request = JsonRequestPacketDeserializer::deserializeJoinRoomRequest(info.buffer);
     Room* room = m_handlerFactory.getRoomManager().getRoomById(request.roomId);
-    room->addUser(m_user);
+
     JoinRoomResponse response;
-    response.status = 1;
+
+    if (room != nullptr) {
+        room->addUser(m_user);
+        response.status = 1; // Success
+    }
+    else {
+        response.status = 0; // Fail (Room doesn't exist)
+    }
 
     result.response = JsonResponsePacketSerializer::serializeResponse(response);
+    result.newHandler = m_handlerFactory.createMenuRequestHandler(m_user.getUsername());
     return result;
 }
 RequestResult MenuRequestHandler::createRoom(const RequestInfo& info)
@@ -146,7 +144,6 @@ RequestResult MenuRequestHandler::createRoom(const RequestInfo& info)
     RequestResult result;
     CreateRoomRequest request = JsonRequestPacketDeserializer::deserializeCreateRoomRequest(info.buffer);
     RoomData data;
-    data.id;
     data.name = request.roomName;
     data.maxPlayers = request.maxUsers;
     data.numOfQuestionsInGame = request.questionCount;

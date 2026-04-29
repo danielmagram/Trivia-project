@@ -1,10 +1,13 @@
 #include "RoomManager.h"
 
-void RoomManager::createRoom(const LoggedUser& creator, const RoomData& roomData)
+void RoomManager::createRoom(const LoggedUser& creator, RoomData& roomData)
 {
+    m_roomCounter++;
+    roomData.id = m_roomCounter; 
+
     Room newRoom(roomData);
     newRoom.addUser(creator);
-	m_rooms.push_back(newRoom);
+    m_rooms.push_back(newRoom);
 }
 
 void RoomManager::deleteRoom(unsigned int roomId)

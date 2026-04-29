@@ -4,12 +4,8 @@
 #include "LoginManager.h" 
 #include "JsonRequestPacketDeserializer.h"
 #include "JsonResponsePacketSerializer.h"
+#include "constants.h"
 
-
-constexpr int LOGIN_REQUEST_ID = 202;
-constexpr int SIGNUP_REQUEST_ID = 33;
-constexpr int LOGIN_SUCCESS_STATUS = 1;
-constexpr int SIGNUP_SUCCESS_STATUS = 1;
 
 
 LoginRequestHandler::LoginRequestHandler(RequestHandlerFactory& factory) : m_handlerFactory(factory)
@@ -18,7 +14,8 @@ LoginRequestHandler::LoginRequestHandler(RequestHandlerFactory& factory) : m_han
 
 bool LoginRequestHandler::isRequestRelevant(const RequestInfo& info) const
 {
-    return (info.id == LOGIN_REQUEST_ID || info.id == SIGNUP_REQUEST_ID);
+    RequestCode code = static_cast<RequestCode>(info.id);
+    return (code == RequestCode::LOGIN || code == RequestCode::SIGNUP);
 }
 
 RequestResult LoginRequestHandler::handleRequest(const RequestInfo& info)
@@ -28,11 +25,11 @@ RequestResult LoginRequestHandler::handleRequest(const RequestInfo& info)
 
     try
     {
-        if (info.id == LOGIN_REQUEST_ID) // LOGIN
+        if (info.id == static_cast<unsigned char>(RequestCode::LOGIN)) // LOGIN
         {
             return login(info); 
         }
-        else if (info.id == SIGNUP_REQUEST_ID) // SIGNUP
+        else if (info.id == static_cast<unsigned char>(RequestCode::SIGNUP)) // SIGNUP
         {
             return signup(info); 
         }
@@ -58,9 +55,9 @@ RequestResult LoginRequestHandler::login(const RequestInfo& info)
     LoginStatus status = m_handlerFactory.getLoginManager().login(req.username, req.password);
 
     LoginResponse res;
-    if (status.status == LOGIN_SUCCESS_STATUS) // SUCCESS 
+    if (status.status == static_cast<unsigned int>(Status::SUCCESS)) // SUCCESS
     {
-        res.status = LOGIN_SUCCESS_STATUS;
+		res.status = static_cast<unsigned int>(Status::SUCCESS);
         result.response = JsonResponsePacketSerializer::serializeResponse(res);
         result.newHandler = m_handlerFactory.createMenuRequestHandler(req.username);
     }
@@ -81,9 +78,9 @@ RequestResult LoginRequestHandler::signup(const RequestInfo& info)
     SignUpStatus status = m_handlerFactory.getLoginManager().signup(req.username, req.password, req.email);
 
     SignupResponse res;
-    if (status.status == SIGNUP_SUCCESS_STATUS) // SUCCESS
+    if (status.status == static_cast<unsigned int>(Status::SUCCESS)) // SUCCESS
     {
-        res.status = SIGNUP_SUCCESS_STATUS;
+        res.status = static_cast<unsigned int>(Status::SUCCESS);
         result.response = JsonResponsePacketSerializer::serializeResponse(res);
         result.newHandler = m_handlerFactory.createMenuRequestHandler(req.username);
     }
