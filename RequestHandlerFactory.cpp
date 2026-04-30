@@ -16,14 +16,14 @@ RequestHandlerFactory::~RequestHandlerFactory()
     }
 }
 
-IRequestHandler* RequestHandlerFactory::createLoginRequestHandler()
+std::unique_ptr<IRequestHandler> RequestHandlerFactory::createLoginRequestHandler()
 {
-	return new LoginRequestHandler(*this); // Interface instead of concrete class
+    return std::make_unique<LoginRequestHandler>(*this);
 }
 
-IRequestHandler* RequestHandlerFactory::createMenuRequestHandler(const std::string& user)
+std::unique_ptr<IRequestHandler> RequestHandlerFactory::createMenuRequestHandler(const std::string& user)
 {
-    return new MenuRequestHandler(*this, user); // fix this
+    return std::make_unique<MenuRequestHandler>(*this, user);
 }
 
 LoginManager& RequestHandlerFactory::getLoginManager()

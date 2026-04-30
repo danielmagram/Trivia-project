@@ -21,7 +21,7 @@ private:
     void handleNewClient(SOCKET clientSocket);
 
     SOCKET m_serverSocket;
-    std::map<SOCKET, IRequestHandler*> m_clients;
-    std::mutex m_clientsMutex; 
+    std::map<SOCKET, std::unique_ptr<IRequestHandler>> m_clients;
+    std::mutex m_clientsMutex;
     RequestHandlerFactory* m_handlerFactory;
 };

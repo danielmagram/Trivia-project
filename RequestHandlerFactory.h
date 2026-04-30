@@ -4,6 +4,7 @@
 #include "LoginManager.h" 
 #include "IDatabase.h"   
 #include "IRequestHandler.h" 
+#include <memory>
 class RequestHandlerFactory
 {
 public:
@@ -11,8 +12,8 @@ public:
     ~RequestHandlerFactory();
 
     // The return types must be the Base Interface!
-    IRequestHandler* createLoginRequestHandler();
-    IRequestHandler* createMenuRequestHandler(const std::string& user);
+    std::unique_ptr<IRequestHandler> createLoginRequestHandler();
+    std::unique_ptr<IRequestHandler> createMenuRequestHandler(const std::string& user);
 
     LoginManager& getLoginManager();
     RoomManager& getRoomManager();
