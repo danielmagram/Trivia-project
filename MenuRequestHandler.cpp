@@ -85,7 +85,7 @@ RequestResult MenuRequestHandler::getRooms(const RequestInfo& info)
     RequestResult result;
     GetRoomsResponse response;
     response.rooms = m_handlerFactory.getRoomManager().getRooms();
-    response.status = (response.rooms.empty()) ? 1 : 0;
+	response.status = static_cast<unsigned int>(Status::SUCCESS);
     result.response = JsonResponsePacketSerializer::serializeResponse(response);
     return result;
 }
