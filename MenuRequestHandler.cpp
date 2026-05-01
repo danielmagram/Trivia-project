@@ -19,10 +19,15 @@ bool MenuRequestHandler::isRequestRelevant(const RequestInfo& info) const
     switch (code)
     {
     case RequestCode::GET_ROOMS:
+		return true;
     case RequestCode::GET_PLAYERS:
+		return true;
     case RequestCode::JOIN_ROOM:
+		return true;
     case RequestCode::CREATE_ROOM:
+		return true;
     case RequestCode::GET_HIGHSCORE:
+		return true;
     case RequestCode::GET_PERSONAL_STATS:
         return true;
     default:
