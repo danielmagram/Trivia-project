@@ -8,7 +8,6 @@
 #include <cstring>
 #include <chrono>
 
-
 #pragma comment(lib, "Ws2_32.lib")
 constexpr char EXIT_COMMAND[] = "EXIT";
 
@@ -69,13 +68,10 @@ void Communicator::startHandleRequests()
         }
         std::cout << "Client connected!" << std::endl;
 
-        IRequestHandler* handler = m_handlerFactory->createLoginRequestHandler();
-        // --- LOCK BEFORE ADDING TO MAP ---
         {
             std::lock_guard<std::mutex> lock(m_clientsMutex);
-            m_clients[clientSocket] = handler;
+            m_clients[clientSocket] = m_handlerFactory->createLoginRequestHandler();
         }
-        // Lock automatically releases here
 
         std::thread(&Communicator::handleNewClient, this, clientSocket).detach();
     }
@@ -145,10 +141,11 @@ void Communicator::handleNewClient(SOCKET clientSocket)
             info.id = code;
             info.receivalTime = time;
 
+
             IRequestHandler* handler = nullptr;
             {
                 std::lock_guard<std::mutex> lock(m_clientsMutex);
-                handler = m_clients[clientSocket];
+                handler = m_clients[clientSocket].get();
             }
 
             RequestResult result;
@@ -161,8 +158,8 @@ void Communicator::handleNewClient(SOCKET clientSocket)
             {
                 ErrorResponse res;
                 res.message = "ERROR: Irrelevant Request";
-                result.response = JsonResponsePacketSerializer::serializeErrorResponse(res);
-                result.newHandler = handler; // Stay in current state
+                result.response = JsonResponsePacketSerializer::serializeResponse(res);
+                result.newHandler = nullptr;
             }
 
             size_t sentBytes = 0;
@@ -177,11 +174,10 @@ void Communicator::handleNewClient(SOCKET clientSocket)
                 sentBytes += static_cast<size_t>(s);
             }
 
-            if (result.newHandler != nullptr && result.newHandler != handler)
+            if (result.newHandler != nullptr)
             {
                 std::lock_guard<std::mutex> lock(m_clientsMutex);
-                m_clients[clientSocket] = result.newHandler;
-                delete handler; 
+                m_clients[clientSocket] = std::move(result.newHandler);
             }
         }
     }
@@ -196,9 +192,7 @@ void Communicator::handleNewClient(SOCKET clientSocket)
         std::lock_guard<std::mutex> lock(m_clientsMutex);
         if (m_clients.find(clientSocket) != m_clients.end())
         {
-            delete m_clients[clientSocket];
             m_clients.erase(clientSocket);
         }
     }
 }
-

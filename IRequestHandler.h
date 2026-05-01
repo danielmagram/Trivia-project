@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <ctime>
+#include <memory>
 
 
 class IRequestHandler;
@@ -15,7 +16,7 @@ struct RequestInfo
 struct RequestResult
 {
     std::vector<unsigned char> response; 
-    IRequestHandler* newHandler; 
+    std::unique_ptr<IRequestHandler> newHandler;
 };
 
 class IRequestHandler

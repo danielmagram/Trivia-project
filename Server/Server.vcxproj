@@ -124,6 +124,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\Constants.h" />
     <ClInclude Include="..\IDatabase.h" />
     <ClInclude Include="..\IRequestHandler.h" />
     <ClInclude Include="..\json.hpp" />
@@ -132,12 +133,16 @@
     <ClInclude Include="..\LoggedUser.h" />
     <ClInclude Include="..\LoginManager.h" />
     <ClInclude Include="..\MenuRequestHandler.h" />
+    <ClInclude Include="..\Question.h" />
     <ClInclude Include="..\RequestHandlerFactory.h" />
+    <ClInclude Include="..\Room.h" />
+    <ClInclude Include="..\RoomManager.h" />
     <ClInclude Include="..\Server.h" />
     <ClInclude Include="..\LoginRequestHandler.h" />
     <ClInclude Include="..\Communicator.h" />
     <ClInclude Include="..\sqlite3.h" />
     <ClInclude Include="..\SqliteDatabase.h" />
+    <ClInclude Include="..\StatisticsManager.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Communicator.cpp" />
@@ -148,10 +153,14 @@
     <ClCompile Include="..\LoginRequestHandler.cpp" />
     <ClCompile Include="..\main.cpp" />
     <ClCompile Include="..\MenuRequestHandler.cpp" />
+    <ClCompile Include="..\Question.cpp" />
     <ClCompile Include="..\RequestHandlerFactory.cpp" />
+    <ClCompile Include="..\Room.cpp" />
+    <ClCompile Include="..\RoomManager.cpp" />
     <ClCompile Include="..\Server.cpp" />
     <ClCompile Include="..\sqlite3.c" />
     <ClCompile Include="..\SqliteDatabase.cpp" />
+    <ClCompile Include="..\StatisticsManager.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
