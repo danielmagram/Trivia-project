@@ -141,4 +141,4 @@ namespace TriviaClient.Models
         [JsonProperty("statistics")]
         public List<string> Statistics { get; set; }
     }
-}
+} 
