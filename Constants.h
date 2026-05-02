@@ -21,7 +21,8 @@ enum class Status : unsigned int {
     WRONG_PARAMETERS = 3,
     ROOM_FULL = 4,
     ROOM_NOT_FOUND = 5,
-	EMPTY_VALUE = 6,
-	USER_EXISTS = 7,
-	USER_ALREADY_LOGGED_IN = 8,
+	NO_ROOMS = 6,
+	EMPTY_VALUE = 7,
+	USER_EXISTS = 8,
+	USER_ALREADY_LOGGED_IN = 9,
 };

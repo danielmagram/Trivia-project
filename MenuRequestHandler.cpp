@@ -72,7 +72,7 @@ RequestResult MenuRequestHandler::signout(const RequestInfo& info)
 {
     LoginManager loginManager = m_handlerFactory.getLoginManager();
     LogoutResponse response;
-	response.status = 1; // Success
+	response.status = static_cast<unsigned int>(Status::SUCCESS);    
     loginManager.logout(m_user.getUsername());
     RequestResult result;
     
@@ -85,7 +85,7 @@ RequestResult MenuRequestHandler::getRooms(const RequestInfo& info)
     RequestResult result;
     GetRoomsResponse response;
     response.rooms = m_handlerFactory.getRoomManager().getRooms();
-	response.status = static_cast<unsigned int>(Status::SUCCESS);
+	response.status = response.rooms.empty() ? static_cast<unsigned int>(Status::NO_ROOMS) : static_cast<unsigned int>(Status::SUCCESS);
     result.response = JsonResponsePacketSerializer::serializeResponse(response);
     return result;
 }
@@ -94,6 +94,12 @@ RequestResult MenuRequestHandler::getPlayersInRoom(const RequestInfo& info)
     RequestResult result;
     GetPlayersInRoomRequest request = JsonRequestPacketDeserializer::deserializeGetPlayersRequest(info.buffer);
     Room* room = m_handlerFactory.getRoomManager().getRoomById(request.roomId);
+    if (room == nullptr) {
+        ErrorResponse err;
+        err.message = "Room not found";
+        result.response = JsonResponsePacketSerializer::serializeResponse(err);
+        return result;
+	}
     GetPlayersInRoomResponse response;
     std::vector<LoggedUser> players = room->getAllUsers();
     response.players.reserve(players.size()); // more efficient
@@ -110,7 +116,7 @@ RequestResult MenuRequestHandler::getPersonalStats(const RequestInfo& info)
 {
     GetPersonalStatsResponse response;
     response.statistics = m_handlerFactory.getStatisticsManager().getUserStatistics(m_user.getUsername());
-    response.status = (response.statistics.empty()) ? 1 : 0;
+	response.status = static_cast<unsigned int>(Status::SUCCESS);
     RequestResult result;
     result.response = JsonResponsePacketSerializer::serializeResponse(response);
     return result;
@@ -119,7 +125,7 @@ RequestResult MenuRequestHandler::getHighScore(const RequestInfo& info)
 {
     GetHighScoreResponse response;
     response.statistics = m_handlerFactory.getStatisticsManager().getHighScore();
-    response.status = (response.statistics.empty()) ? 1 : 0;
+	response.status = static_cast<unsigned int>(Status::SUCCESS);
     RequestResult result;
     result.response = JsonResponsePacketSerializer::serializeResponse(response);
     return result;
@@ -131,19 +137,37 @@ RequestResult MenuRequestHandler::joinRoom(const RequestInfo& info)
     Room* room = m_handlerFactory.getRoomManager().getRoomById(request.roomId);
 
     JoinRoomResponse response;
-
-    if (room != nullptr) {
-        room->addUser(m_user);
-        response.status = 1; // Success
+    if (room != nullptr) 
+    {
+		int maxPlayers = room->getMetadata().maxPlayers;
+		std::vector<LoggedUser> players = room->getAllUsers();
+		int countPlayers = static_cast<int>(players.size());
+		if (countPlayers < maxPlayers) {
+			room->addUser(m_user);
+			response.status = static_cast<unsigned int>(Status::SUCCESS);
+		}
+		else {
+			ErrorResponse err;
+			err.message = "Room is full";
+			result.response = JsonResponsePacketSerializer::serializeResponse(err);
+			response.status = static_cast<unsigned int>(Status::ROOM_FULL);
+            return result;
+		}
+	}
+	else 
+	{
+		ErrorResponse err;
+		err.message = "Room not found";
+		result.response = JsonResponsePacketSerializer::serializeResponse(err);
+        response.status = static_cast<unsigned int>(Status::ROOM_NOT_FOUND);
+		return result;
     }
-    else {
-        response.status = 0; // Fail (Room doesn't exist)
-    }
-
     result.response = JsonResponsePacketSerializer::serializeResponse(response);
     result.newHandler = m_handlerFactory.createMenuRequestHandler(m_user.getUsername());
     return result;
 }
+
+
 RequestResult MenuRequestHandler::createRoom(const RequestInfo& info)
 {
     RequestResult result;
@@ -158,7 +182,7 @@ RequestResult MenuRequestHandler::createRoom(const RequestInfo& info)
 
     
     CreateRoomResponse response;
-    response.status = 1;
+    response.status = static_cast<unsigned int>(Status::SUCCESS);
 
     result.response = JsonResponsePacketSerializer::serializeResponse(response);
     return result;
