@@ -16,23 +16,9 @@ MenuRequestHandler::MenuRequestHandler(RequestHandlerFactory& factory, std::stri
 bool MenuRequestHandler::isRequestRelevant(const RequestInfo& info) const
 {
     RequestCode code = static_cast<RequestCode>(info.id);
-    switch (code)
-    {
-    case RequestCode::GET_ROOMS:
-		return true;
-    case RequestCode::GET_PLAYERS:
-		return true;
-    case RequestCode::JOIN_ROOM:
-		return true;
-    case RequestCode::CREATE_ROOM:
-		return true;
-    case RequestCode::GET_HIGHSCORE:
-		return true;
-    case RequestCode::GET_PERSONAL_STATS:
+    if(code >= RequestCode::JOIN_ROOM && code <= RequestCode::GET_HIGHSCORE)
         return true;
-    default:
-        return false;
-    }
+    return false;
 }
 
 RequestResult MenuRequestHandler::handleRequest(const RequestInfo& info)
