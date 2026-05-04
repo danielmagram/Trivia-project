@@ -59,13 +59,13 @@ RequestResult LoginRequestHandler::login(const RequestInfo& info)
     {
 		res.status = static_cast<unsigned int>(Status::SUCCESS);
         result.response = JsonResponsePacketSerializer::serializeResponse(res);
-        result.newHandler = m_handlerFactory.createMenuRequestHandler(req.username);
+		result.newHandler = std::move(m_handlerFactory.createMenuRequestHandler(req.username));
     }
     else
     {
 		res.status = status.status; // Pass the specific error code back to the client
         result.response = JsonResponsePacketSerializer::serializeResponse(res);
-        result.newHandler = m_handlerFactory.createLoginRequestHandler();
+        result.newHandler = std::move(m_handlerFactory.createLoginRequestHandler());
     }
     return result;
 }
@@ -82,13 +82,13 @@ RequestResult LoginRequestHandler::signup(const RequestInfo& info)
     {
         res.status = static_cast<unsigned int>(Status::SUCCESS);
         result.response = JsonResponsePacketSerializer::serializeResponse(res);
-        result.newHandler = m_handlerFactory.createMenuRequestHandler(req.username);
+		result.newHandler = std::move(m_handlerFactory.createLoginRequestHandler());
     }
     else
     {
         res.status = status.status;
         result.response = JsonResponsePacketSerializer::serializeResponse(res);
-        result.newHandler = m_handlerFactory.createLoginRequestHandler();
+        result.newHandler = std::move(m_handlerFactory.createLoginRequestHandler());
     }
     return result;
 }
