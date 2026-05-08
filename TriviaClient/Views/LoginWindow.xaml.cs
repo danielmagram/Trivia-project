@@ -15,7 +15,6 @@ namespace TriviaClient.Views
 
         private void btnLogin_Click(object sender, RoutedEventArgs e)
         {
-            // 1. Validation: Don't even talk to the server if fields are empty
             if (string.IsNullOrWhiteSpace(txtUsername.Text) || string.IsNullOrWhiteSpace(txtPassword.Password))
             {
                 MessageBox.Show("Please enter both username and password.", "Input Error", MessageBoxButton.OK, MessageBoxImage.Warning);
@@ -24,38 +23,45 @@ namespace TriviaClient.Views
 
             try
             {
-                // 2. Prepare the Request
                 var loginReq = new LoginRequest
                 {
                     Username = txtUsername.Text,
                     Password = txtPassword.Password
                 };
 
-                // 3. Serialize to JSON
                 string jsonPayload = Serializer.Serialize(loginReq);
 
-                // 4. Send to Server (Code 200 for Login)
-                Communicator.Instance.SendRequest(200, jsonPayload);
+                Communicator.Instance.SendRequest(202, jsonPayload);
 
-                // 5. Wait for Response
                 ResponseInfo response = Communicator.Instance.ReceiveResponse();
 
-                // 6. Handle the result
+
                 var loginRes = Serializer.Deserialize<LoginResponse>(response.JsonPayload);
 
-                if (loginRes.Status == 1) // Assuming 1 = Success in your C++ logic
+                switch (loginRes.Status)
                 {
-                    // Success! Save user info to the global state
-                    SessionData.Username = txtUsername.Text;
+                    case 1: // SUCCESS
+                        SessionData.Username = txtUsername.Text;
+                        MainWindow menu = new MainWindow();
+                        menu.Show();
+                        this.Close();
+                        break;
 
-                    // Navigate to Menu (Assuming your partner created MenuWindow)
-                    //MenuWindow menu = new MenuWindow();
-                    //menu.Show();
-                    //this.Close();
-                }
-                else
-                {
-                    MessageBox.Show("Invalid username or password.", "Login Failed", MessageBoxButton.OK, MessageBoxImage.Error);
+                    case 3: // WRONG PARAMS
+                        MessageBox.Show("Invalid username or password.", "Login Failed", MessageBoxButton.OK, MessageBoxImage.Error);
+                        break;
+
+                    case 9: // ALREADY LOGGED IN
+                        MessageBox.Show("This user is already logged in from another location.", "Login Failed", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        break;
+
+                    case 2: // DB ERROR
+                        MessageBox.Show("A database error occurred on the server. Please try again later.", "Server Error", MessageBoxButton.OK, MessageBoxImage.Stop);
+                        break;
+
+                    default: // FALLBACK
+                        MessageBox.Show($"Unknown error occurred. Status Code: {loginRes.Status}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                        break;
                 }
             }
             catch (Exception ex)
@@ -66,7 +72,6 @@ namespace TriviaClient.Views
 
         private void btnBack_Click(object sender, RoutedEventArgs e)
         {
-            // If your partner's StartupWindow is ready, show it and close this one
             var startup = new StartupWindow();
             startup.Show();
             this.Close();
