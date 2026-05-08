@@ -9,8 +9,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="State\" />
-    <Folder Include="Views\" />
+	  <Folder Include="State\" />
+	  <Folder Include="Networking\" />
+	  <Folder Include="Models\" />
+	  <Folder Include="Views\" />
   </ItemGroup>
 
   <ItemGroup>
