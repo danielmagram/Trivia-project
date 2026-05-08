@@ -28,7 +28,7 @@ namespace TriviaClient.Views
             LoginWindow login = new LoginWindow();
             login.Show();
 
-            this.Close(); 
+            this.Close();
         }
 
         private void SignUp_Click(object sender, RoutedEventArgs e)
