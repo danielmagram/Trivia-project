@@ -13,6 +13,11 @@ MenuRequestHandler::MenuRequestHandler(RequestHandlerFactory& factory, std::stri
 
 }
 
+MenuRequestHandler::~MenuRequestHandler()
+{
+    m_handlerFactory.getLoginManager().logout(m_user.getUsername());
+}
+
 bool MenuRequestHandler::isRequestRelevant(const RequestInfo& info) const
 {
     RequestCode code = static_cast<RequestCode>(info.id);

@@ -8,7 +8,7 @@ class MenuRequestHandler : public IRequestHandler
 {
 public:
     MenuRequestHandler(RequestHandlerFactory& factory, std::string user);
-    ~MenuRequestHandler() = default;
+    ~MenuRequestHandler();
 
     bool isRequestRelevant(const RequestInfo& info) const override;
     RequestResult handleRequest(const RequestInfo& info) override;

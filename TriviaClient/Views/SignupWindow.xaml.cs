@@ -8,6 +8,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using TriviaClient.Models;
 using TriviaClient.Networking;
+using TriviaClient.State;
 
 namespace TriviaClient.Views
 {
@@ -31,22 +32,58 @@ namespace TriviaClient.Views
             string password = PasswordBox.Password;
             string email = EmailBox.Text;
 
-            SignupRequest req = new SignupRequest();
-            req.Username = username;
-            req.Password = password;    
-            req.Email = email;
-
-            Communicator.Instance.SendRequest(33, Serializer.Serialize(req));
-            ResponseInfo info = Communicator.Instance.ReceiveResponse();
-            SignupResponse response = new SignupResponse();
-            response = Serializer.Deserialize<SignupResponse>(info.JsonPayload);
-            if (response.Status == 1)
+            if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password) || string.IsNullOrWhiteSpace(email))
             {
-                MenuWindow start = new MenuWindow();
-                start.Show();
-                this.Close();
+                MessageBox.Show("Please fill in all fields.", "Input Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
             }
-            MessageBox.Show("Signup failed!");
+
+            try
+            {
+                SignupRequest req = new SignupRequest
+                {
+                    Username = username,
+                    Password = password,
+                    Email = email
+                };
+
+                Communicator.Instance.SendRequest(33, Serializer.Serialize(req));
+
+                ResponseInfo info = Communicator.Instance.ReceiveResponse();
+                var response = Serializer.Deserialize<SignupResponse>(info.JsonPayload);
+
+
+                switch (response.Status)
+                {
+                    case 1: // SUCCESS
+                        MessageBox.Show("Account created successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                        MenuWindow menu = new MenuWindow();
+                        menu.Show();
+                        this.Close();
+                        break;
+
+                    case 7: // EMPTY VALUE
+                        MessageBox.Show("One or more fields were empty.", "Signup Failed", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        break;
+
+                    case 8: // USERNAME EXISTS
+                        MessageBox.Show("This username is already taken. Please choose another.", "Signup Failed", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        break;
+
+                    case 2: // DB ERROR
+                        MessageBox.Show("A database error occurred on the server.", "Server Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                        break;
+
+                    default:
+                        MessageBox.Show($"Unexpected status code: {response.Status}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Network Error: {ex.Message}", "Connection Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
     }
 }
