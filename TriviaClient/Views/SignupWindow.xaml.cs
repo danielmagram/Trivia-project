@@ -11,6 +11,8 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using TriviaClient.Models;
+using TriviaClient.Networking;
 
 namespace TriviaClient.Views
 {
@@ -34,6 +36,22 @@ namespace TriviaClient.Views
             string password = PasswordBox.Password;
             string email = EmailBox.Text;
 
+            SignupRequest req = new SignupRequest();
+            req.Username = username;
+            req.Password = password;    
+            req.Email = email;
+
+            Communicator.Instance.SendRequest(33, Serializer.Serialize(req));
+            ResponseInfo info = Communicator.Instance.ReceiveResponse();
+            SignupResponse response = new SignupResponse();
+            response = Serializer.Deserialize<SignupResponse>(info.JsonPayload);
+            if (response.Status == 1)
+            {
+                MenuWindow start = new MenuWindow();
+                start.Show();
+                this.Close();
+            }
+            MessageBox.Show("Signup failed!");
         }
     }
 }
