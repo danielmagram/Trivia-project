@@ -13,10 +13,7 @@ MenuRequestHandler::MenuRequestHandler(RequestHandlerFactory& factory, std::stri
 
 }
 
-MenuRequestHandler::~MenuRequestHandler()
-{
-    m_handlerFactory.getLoginManager().logout(m_user.getUsername());
-}
+
 
 bool MenuRequestHandler::isRequestRelevant(const RequestInfo& info) const
 {
@@ -71,6 +68,11 @@ RequestResult MenuRequestHandler::handleRequest(const RequestInfo& info)
     }
 
     return RequestResult();
+}
+
+void MenuRequestHandler::onClientDisconnected()
+{
+    m_handlerFactory.getLoginManager().logout(m_user.getUsername());
 }
 
 RequestResult MenuRequestHandler::signout(const RequestInfo& info)

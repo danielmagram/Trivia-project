@@ -8,10 +8,12 @@ class MenuRequestHandler : public IRequestHandler
 {
 public:
     MenuRequestHandler(RequestHandlerFactory& factory, std::string user);
-    ~MenuRequestHandler();
+    ~MenuRequestHandler() = default;
 
     bool isRequestRelevant(const RequestInfo& info) const override;
     RequestResult handleRequest(const RequestInfo& info) override;
+    void onClientDisconnected() override;
+
 private:
 	RequestHandlerFactory& m_handlerFactory;
     LoggedUser m_user;
