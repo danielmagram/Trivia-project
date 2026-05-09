@@ -1,8 +1,8 @@
 #include "LoginManager.h"
+#include "Constants.h"
+#include <algorithm> 
+#include <iostream>
 
-constexpr int DB_FAILED = -1;
-constexpr int WRONG_PARAMETERS = 0;
-constexpr int SUCCESS = 1;
 LoginManager::LoginManager(IDatabase* db)
     : m_database(db)
 {
@@ -12,53 +12,58 @@ SignUpStatus LoginManager::signup(const std::string& username, const std::string
 {
     if (username.empty() || password.empty() || email.empty())
     {
-        return { WRONG_PARAMETERS };
+        return { static_cast<unsigned int>(Status::EMPTY_VALUE) };
     }
+
     try
     {
         if (m_database->doesUserExist(username))
-            return { WRONG_PARAMETERS };
+            return { static_cast<unsigned int>(Status::USER_EXISTS) };
+
         if (m_database->addNewUser(username, password, email))
-            return { SUCCESS };
+        {
+            m_database->initUserStatistics(username);
+            return { static_cast<unsigned int>(Status::SUCCESS) };
+        }
+
+        return { static_cast<unsigned int>(Status::DB_ERROR) };
     }
     catch (const std::exception& e)
     {
         std::cerr << "DB error: " << e.what() << std::endl;
-        return { DB_FAILED };
+        return { static_cast<unsigned int>(Status::DB_ERROR) };
     }
 }
+
 LoginStatus LoginManager::login(const std::string& username, const std::string& password)
 {
-    for (const auto& user : m_loggedUsers)
+    auto it = std::find_if(m_loggedUsers.begin(), m_loggedUsers.end(),
+        [&username](const LoggedUser& user) { return user.getUsername() == username; });
+
+    if (it != m_loggedUsers.end())
     {
-        if (user.getUsername() == username)
-        {
-            return { WRONG_PARAMETERS }; 
-        }
+        return { static_cast<unsigned int>(Status::USER_ALREADY_LOGGED_IN) };
     }
+
     try
     {
         if (!m_database->doesUserExist(username) || !m_database->doesPasswordMatch(username, password))
-            return { WRONG_PARAMETERS };
+            return { static_cast<unsigned int>(Status::WRONG_PARAMETERS) };
 
         m_loggedUsers.push_back(LoggedUser(username));
 
-        return { SUCCESS };
+        return { static_cast<unsigned int>(Status::SUCCESS) };
     }
     catch (const std::exception& e)
     {
         std::cerr << "DB error: " << e.what() << std::endl;
-        return { DB_FAILED };
+        return { static_cast<unsigned int>(Status::DB_ERROR) };
     }
 }
+
 void LoginManager::logout(const std::string& username)
 {
-    for (auto user = m_loggedUsers.begin(); user != m_loggedUsers.end(); ++user)
-    {
-        if (user->getUsername() == username)
-        {
-            m_loggedUsers.erase(user);
-            return;
-        }
-    }
+    m_loggedUsers.erase(std::remove_if(m_loggedUsers.begin(), m_loggedUsers.end(),
+        [&username](const LoggedUser& user) { return user.getUsername() == username; }),
+        m_loggedUsers.end());
 }
