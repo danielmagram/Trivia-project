@@ -22,6 +22,51 @@ namespace TriviaClient.Views
         public MenuWindow()
         {
             InitializeComponent();
+            UsernameText.Text = "        User123";
         }
+        private void Logout_Click(object sender, RoutedEventArgs e)
+        {
+            StartupWindow startup = new StartupWindow();
+            startup.Show();
+            this.Close();
+        }
+
+        private void JoinRoom_Click(object sender, RoutedEventArgs e)
+        {
+            JoinRoomWindow joinRoom = new JoinRoomWindow();
+            joinRoom.Show();
+
+            this.Close();
+        }
+
+        private void CreateRoom_Click(object sender, RoutedEventArgs e)
+        {
+            CreateRoomWindow createRoom = new CreateRoomWindow();
+            createRoom.Show();
+
+            this.Close();
+        }
+
+        private void MyStatus_Click(object sender, RoutedEventArgs e)
+        {
+            StatusWindow status = new StatusWindow();
+            status.Show();
+
+            this.Close();
+        }
+
+        private void BestScores_Click(object sender, RoutedEventArgs e)
+        {
+            BestScoresWindow scores = new BestScoresWindow();
+            scores.Show();
+
+            this.Close();
+        }
+
+        private void Quit_Click(object sender, RoutedEventArgs e)
+        {
+            Application.Current.Shutdown();
+        }
+
     }
 }
