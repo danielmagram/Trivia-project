@@ -61,7 +61,7 @@ namespace TriviaClient.Views
 
         private void BestScores_Click(object sender, RoutedEventArgs e)
         {
-            BestScoresWindow scores = new BestScoresWindow();
+            HighscoresWindow scores = new HighscoresWindow();
             scores.Show();
 
             this.Close();

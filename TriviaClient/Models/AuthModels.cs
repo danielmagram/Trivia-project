@@ -70,6 +70,10 @@ namespace TriviaClient.Models
         [JsonProperty("answerTimeout")]
         public uint AnswerTimeout { get; set; }
     }
+    public class GetHighscoresRequest
+    {
+        
+    }
 
     // RESPONSES 
     public class ErrorResponse
@@ -128,7 +132,7 @@ namespace TriviaClient.Models
         [JsonProperty("status")]
         public uint Status { get; set; }
 
-        [JsonProperty("statistics")]
+        [JsonProperty("HighScores")]
         public List<string> Statistics { get; set; }
     }
 
@@ -140,4 +144,5 @@ namespace TriviaClient.Models
         [JsonProperty("statistics")]
         public List<string> Statistics { get; set; }
     }
+
 }
