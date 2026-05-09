@@ -11,6 +11,8 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using TriviaClient.Networking;
+using TriviaClient.State;
 
 namespace TriviaClient.Views
 {
@@ -22,10 +24,12 @@ namespace TriviaClient.Views
         public MenuWindow()
         {
             InitializeComponent();
-            UsernameText.Text = "        User123";
+            UsernameText.Text = "        " + SessionData.Username;
         }
         private void Logout_Click(object sender, RoutedEventArgs e)
         {
+            Communicator.Instance.Disconnect();
+            SessionData.Clear();
             StartupWindow startup = new StartupWindow();
             startup.Show();
             this.Close();
@@ -47,10 +51,10 @@ namespace TriviaClient.Views
             this.Close();
         }
 
-        private void MyStatus_Click(object sender, RoutedEventArgs e)
+        private void MyStats_Click(object sender, RoutedEventArgs e)
         {
-            StatusWindow status = new StatusWindow();
-            status.Show();
+            StatsWindow stats = new StatsWindow();
+            stats.Show();
 
             this.Close();
         }

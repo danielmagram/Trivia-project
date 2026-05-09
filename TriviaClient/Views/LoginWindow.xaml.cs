@@ -42,7 +42,7 @@ namespace TriviaClient.Views
                 {
                     case 1: // SUCCESS
                         SessionData.Username = txtUsername.Text;
-                        MainWindow menu = new MainWindow();
+                        MenuWindow menu = new MenuWindow();
                         menu.Show();
                         this.Close();
                         break;

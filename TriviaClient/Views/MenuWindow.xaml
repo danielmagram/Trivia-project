@@ -31,25 +31,26 @@
                        VerticalAlignment="Center" Foreground="ForestGreen"/>
 
             <Button Grid.Column="2" Content="Logout" Width="100" Height="40" 
-                    HorizontalAlignment="Right" Background="#E74C3C" Foreground="White" BorderThickness="0" FontWeight="Bold" FontSize="15"/>
+                    HorizontalAlignment="Right" Background="#E74C3C" Foreground="White" BorderThickness="0" FontWeight="Bold" FontSize="15"
+                    Click="Logout_Click"/>
         </Grid>
 
         <StackPanel Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center" Width="300">
 
             <Button Content="Join Room" Margin="0,10" Padding="15" FontSize="20"
-                    Background="White" BorderBrush="ForestGreen" BorderThickness="2"/>
+                    Background="White" BorderBrush="ForestGreen" BorderThickness="2" Click="JoinRoom_Click"/>
 
             <Button Content="Create Room" Margin="0,10" Padding="15" FontSize="20"
-                    Background="White" BorderBrush="ForestGreen" BorderThickness="2"/>
+                    Background="White" BorderBrush="ForestGreen" BorderThickness="2" Click="CreateRoom_Click"/>
 
-            <Button Content="My Status" Margin="0,10" Padding="15" FontSize="20"
-                    Background="White" BorderBrush="ForestGreen" BorderThickness="2"/>
+            <Button Content="My Stats" Margin="0,10" Padding="15" FontSize="20"
+                    Background="White" BorderBrush="ForestGreen" BorderThickness="2" Click="MyStats_Click"/>
 
             <Button Content="Best Scores" Margin="0,10" Padding="15" FontSize="20"
-                    Background="White" BorderBrush="ForestGreen" BorderThickness="2"/>
+                    Background="White" BorderBrush="ForestGreen" BorderThickness="2" Click="BestScores_Click"/>
 
             <Button Content="EXIT" Margin="0,30,0,10" Padding="10" FontSize="18" FontWeight="Bold" Width="100" Height="40"
-                    Background="Red" Foreground="White" BorderThickness="0"/>
+                    Background="Red" Foreground="White" BorderThickness="0" Click="Quit_Click"/>
 
         </StackPanel>
     </Grid>

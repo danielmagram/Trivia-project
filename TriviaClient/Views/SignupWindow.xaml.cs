@@ -57,7 +57,7 @@ namespace TriviaClient.Views
                 {
                     case 1: // SUCCESS
                         MessageBox.Show("Account created successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
-
+                        SessionData.Username = username;
                         MenuWindow menu = new MenuWindow();
                         menu.Show();
                         this.Close();
