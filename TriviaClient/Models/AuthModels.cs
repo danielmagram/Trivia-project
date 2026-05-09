@@ -146,3 +146,30 @@ namespace TriviaClient.Models
     }
 
 }
+public class RoomData
+{
+    public int Id { get; set; }
+    public string Name { get; set; }
+    public int MaxPlayers { get; set; }
+    public int NumOfPlayers { get; set; }
+    public int TimePerQuestion { get; set; }
+    public int IsActive { get; set; }
+}
+
+public class GetRoomsRequest { }
+
+public class GetRoomsResponse
+{
+    public int Status { get; set; }
+    public List<RoomData> Rooms { get; set; }
+}
+
+public class JoinRoomRequest
+{
+    public int RoomId { get; set; }
+}
+
+public class JoinRoomResponse
+{
+    public int Status { get; set; }
+}
