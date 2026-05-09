@@ -154,23 +154,21 @@ RequestResult MenuRequestHandler::joinRoom(const RequestInfo& info)
 			response.status = static_cast<unsigned int>(Status::SUCCESS);
 		}
 		else {
-			ErrorResponse err;
-			err.message = "Room is full";
-			result.response = JsonResponsePacketSerializer::serializeResponse(err);
-			response.status = static_cast<unsigned int>(Status::ROOM_FULL);
+            response.status = static_cast<unsigned int>(Status::ROOM_FULL);
+            result.response = JsonResponsePacketSerializer::serializeResponse(response);
+            result.newHandler = nullptr;
             return result;
 		}
 	}
 	else 
 	{
-		ErrorResponse err;
-		err.message = "Room not found";
-		result.response = JsonResponsePacketSerializer::serializeResponse(err);
+		
         response.status = static_cast<unsigned int>(Status::ROOM_NOT_FOUND);
-		return result;
+        result.response = JsonResponsePacketSerializer::serializeResponse(response);
+        result.newHandler = nullptr;
+        return result;
     }
     result.response = JsonResponsePacketSerializer::serializeResponse(response);
-    result.newHandler = m_handlerFactory.createMenuRequestHandler(m_user.getUsername());
     return result;
 }
 
