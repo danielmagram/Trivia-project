@@ -63,7 +63,15 @@ LoginStatus LoginManager::login(const std::string& username, const std::string& 
 
 void LoginManager::logout(const std::string& username)
 {
+    const std::size_t beforeCount = m_loggedUsers.size();
+
     m_loggedUsers.erase(std::remove_if(m_loggedUsers.begin(), m_loggedUsers.end(),
         [&username](const LoggedUser& user) { return user.getUsername() == username; }),
         m_loggedUsers.end());
+
+    const std::size_t afterCount = m_loggedUsers.size();
+    if (afterCount < beforeCount)
+    {
+        std::cout << "User logged out: " << username << std::endl;
+    }
 }
