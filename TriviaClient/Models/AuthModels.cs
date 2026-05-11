@@ -75,6 +75,11 @@ namespace TriviaClient.Models
         
     }
 
+    public class GetPersonalStatsRequest
+    {
+
+    }
+
     // RESPONSES 
     public class ErrorResponse
     {
