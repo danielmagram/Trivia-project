@@ -6,7 +6,46 @@
         xmlns:local="clr-namespace:TriviaClient.Views"
         mc:Ignorable="d"
         Title="CreateRoomWindow" Height="450" Width="800">
-    <Grid>
-        
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Margin="0,0,0,30">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Grid.Column="0" x:Name="UsernameText" Text="Hello User" FontSize="18" VerticalAlignment="Center"/>
+
+            <TextBlock Grid.Column="1" Text="TRIVIA" FontSize="28" FontWeight="Bold" 
+                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
+
+            <Button Grid.Column="2" Content="BACK" Width="80" Height="35" 
+                HorizontalAlignment="Right" Click="BackButton_Click"/>
+        </Grid>
+
+        <StackPanel Grid.Row="1" VerticalAlignment="Top" HorizontalAlignment="Center" Width="450">
+
+            <TextBlock Text="Room Name:"/>
+            <TextBox x:Name="RoomNameInput" Margin="0,5,0,15" Height="30" VerticalContentAlignment="Center"/>
+
+            <TextBlock Text="Number of Players:"/>
+            <TextBox x:Name="PlayersInput" Margin="0,5,0,15" Height="30" VerticalContentAlignment="Center"/>
+
+            <TextBlock Text="Number of Questions:"/>
+            <TextBox x:Name="QuestionsInput" Margin="0,5,0,15" Height="30" VerticalContentAlignment="Center"/>
+
+            <TextBlock Text="Time for Question:"/>
+            <TextBox x:Name="TimeInput" Margin="0,5,0,30" Height="30" VerticalContentAlignment="Center"/>
+
+            <Button Content="send" Width="150" Height="45" FontSize="16" 
+                Click="SendButton_Click" Cursor="Hand"/>
+
+        </StackPanel>
     </Grid>
 </Window>
