@@ -26,15 +26,27 @@ namespace TriviaClient.Views
         public StatsWindow()
         {
             InitializeComponent();
-            GetPersonalStatsRequest request = new GetPersonalStatsRequest();
-            Communicator.Instance.SendRequest(150, Serializer.Serialize(request));
-            ResponseInfo info = Communicator.Instance.ReceiveResponse();
-            var response = Serializer.Deserialize<GetPersonalStatsResponse>(info.JsonPayload);
-            GamesCountText.Text = $"number of games: {response.Statistics[0]}";
-            TotalAnswersText.Text = $"number of total answers: {response.Statistics[2]}";
-            RightAnswersText.Text = $"number of right answers: {response.Statistics[2]}";
-            WrongAnswersText.Text = $"number of wrong answers: {response.Statistics[3]}";
-            AvgTimeText.Text = $"average time for answer: {response.Statistics[4]}s";
+            try
+            {
+                GetPersonalStatsRequest request = new GetPersonalStatsRequest();
+                Communicator.Instance.SendRequest(150, Serializer.Serialize(request));
+
+                ResponseInfo info = Communicator.Instance.ReceiveResponse();
+                var response = Serializer.Deserialize<GetPersonalStatsResponse>(info.JsonPayload);
+
+                if (response.Statistics != null && response.Statistics.Count >= 5)
+                {
+                    GamesCountText.Text = $"number of games: {response.Statistics[0]}";
+                    RightAnswersText.Text = $"number of right answers: {response.Statistics[1]}";
+                    TotalAnswersText.Text = $"number of total answers: {response.Statistics[2]}";
+                    WrongAnswersText.Text = $"number of wrong answers: {response.Statistics[3]}";
+                    AvgTimeText.Text = $"average time for answer: {response.Statistics[4]}s";
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
         }
         private void BackButton_Click(object sender, RoutedEventArgs e)
         {
