@@ -143,10 +143,10 @@ namespace TriviaClient.Models
 
     public class GetPersonalStatsResponse
     {
-        [JsonProperty("status")]
+        [JsonProperty("Status")]
         public uint Status { get; set; }
 
-        [JsonProperty("statistics")]
+        [JsonProperty("UserStatistics")]
         public List<string> Statistics { get; set; }
     }
 

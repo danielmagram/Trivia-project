@@ -50,7 +50,10 @@ namespace TriviaClient.Views
         }
         private void BackButton_Click(object sender, RoutedEventArgs e)
         {
+            MenuWindow menu = new MenuWindow();
+            menu.Show();
             this.Close();
+
         }
         private void UpdateButton_Click(object sender, RoutedEventArgs e)
         {
