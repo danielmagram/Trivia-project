@@ -75,6 +75,11 @@ namespace TriviaClient.Models
         
     }
 
+    public class GetPersonalStatsRequest
+    {
+
+    }
+
     // RESPONSES 
     public class ErrorResponse
     {
@@ -138,10 +143,10 @@ namespace TriviaClient.Models
 
     public class GetPersonalStatsResponse
     {
-        [JsonProperty("status")]
+        [JsonProperty("Status")]
         public uint Status { get; set; }
 
-        [JsonProperty("statistics")]
+        [JsonProperty("UserStatistics")]
         public List<string> Statistics { get; set; }
     }
 
