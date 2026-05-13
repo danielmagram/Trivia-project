@@ -1,0 +1,40 @@
+﻿<Window x:Class="TriviaClient.Views.JoinRoomWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Join a Room" Height="450" Width="500" WindowStartupLocation="CenterScreen">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Margin="0,0,0,15">
+            <TextBlock Text="Available Rooms" FontSize="22" FontWeight="Bold" VerticalAlignment="Center"/>
+            <Button Content=" Refresh" Width="80" Height="30" HorizontalAlignment="Right" Click="btnRefresh_Click"/>
+        </Grid>
+
+        <ListView x:Name="lvRooms" Grid.Row="1" Margin="0,0,0,15">
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn Header="ID" DisplayMemberBinding="{Binding Id}" Width="50"/>
+                    <GridViewColumn Header="Room Name" DisplayMemberBinding="{Binding Name}" Width="200"/>
+                    <GridViewColumn Header="Players" Width="100">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock>
+                                    <Run Text="{Binding NumOfPlayers}"/> / <Run Text="{Binding MaxPlayers}"/>
+                                </TextBlock>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                </GridView>
+            </ListView.View>
+        </ListView>
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Content="Back" Width="90" Height="35" Margin="0,0,10,0" Click="btnBack_Click"/>
+            <Button Content="Join Selected" Width="120" Height="35" Background="#4CAF50" Foreground="White" FontWeight="Bold" Click="btnJoin_Click"/>
+        </StackPanel>
+    </Grid>
+</Window>

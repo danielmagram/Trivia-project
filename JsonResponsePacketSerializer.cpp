@@ -107,6 +107,7 @@ std::vector<unsigned char> JsonResponsePacketSerializer::serializeResponse(const
 {
     json j;
     j["HighScores"] = response.statistics;
+    j["Status"] = response.status;
 
     return buildPacket(static_cast<unsigned char>(RequestCode::GET_HIGHSCORE), j);
 }
@@ -115,6 +116,7 @@ std::vector<unsigned char> JsonResponsePacketSerializer::serializeResponse(const
 {
     json j;
     j["UserStatistics"] = response.statistics;
+	j["Status"] = response.status;
 
     return buildPacket(static_cast<unsigned char>(RequestCode::GET_PERSONAL_STATS), j);
 }

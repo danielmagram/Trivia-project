@@ -190,9 +190,16 @@ void Communicator::handleNewClient(SOCKET clientSocket)
 
     {
         std::lock_guard<std::mutex> lock(m_clientsMutex);
-        if (m_clients.find(clientSocket) != m_clients.end())
+
+        
+        auto it = m_clients.find(clientSocket);
+        if (it != m_clients.end())
         {
-            m_clients.erase(clientSocket);
+            // 1. Tell the handler the socket died
+            it->second->onClientDisconnected();
+
+            // 2. Safely erase the handler and socket from the map
+            m_clients.erase(it);
         }
     }
 }
