@@ -63,8 +63,9 @@ namespace TriviaClient.Views
             var response = Serializer.Deserialize<GetPersonalStatsResponse>(info.JsonPayload);
             GamesCountText.Text = $"number of games: {response.Statistics[0]}";
             RightAnswersText.Text = $"number of right answers: {response.Statistics[1]}";
-            WrongAnswersText.Text = $"number of wrong answers: {response.Statistics[2]}";
-            AvgTimeText.Text = $"average time for answer: {response.Statistics[3]}s";
+            TotalAnswersText.Text = $"number of total answers: {response.Statistics[2]}";
+            WrongAnswersText.Text = $"number of wrong answers: {response.Statistics[3]}";
+            AvgTimeText.Text = $"average time for answer: {response.Statistics[4]}s";
         }
     }
 }
