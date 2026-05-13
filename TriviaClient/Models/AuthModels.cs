@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿
+using Newtonsoft.Json;
 
 namespace TriviaClient.Models
 {
@@ -171,7 +172,7 @@ public class GetRoomsResponse
 
 public class JoinRoomRequest
 {
-    public int RoomId { get; set; }
+    public int roomId { get; set; }
 }
 
 public class JoinRoomResponse

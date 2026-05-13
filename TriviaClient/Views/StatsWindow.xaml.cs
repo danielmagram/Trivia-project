@@ -15,6 +15,7 @@ using System.Windows.Media.Media3D;
 using System.Windows.Shapes;
 using TriviaClient.Models;
 using TriviaClient.Networking;
+using TriviaClient.State;
 
 namespace TriviaClient.Views
 {
@@ -29,6 +30,7 @@ namespace TriviaClient.Views
             try
             {
                 GetPersonalStatsRequest request = new GetPersonalStatsRequest();
+                UsernameText.Text = "    " + SessionData.Username;
                 Communicator.Instance.SendRequest(150, Serializer.Serialize(request));
 
                 ResponseInfo info = Communicator.Instance.ReceiveResponse();
