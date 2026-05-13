@@ -182,7 +182,7 @@ RequestResult MenuRequestHandler::createRoom(const RequestInfo& info)
     data.maxPlayers = request.maxUsers;
     data.numOfQuestionsInGame = request.questionCount;
     data.timePerQuestion = request.answerTimeout;
-    data.status = 0;
+    data.status = 1;
     m_handlerFactory.getRoomManager().createRoom(m_user, data);
 
     

@@ -65,7 +65,7 @@ namespace TriviaClient.Views
                 Communicator.Instance.SendRequest(101, Serializer.Serialize(req));
 
                 ResponseInfo info = Communicator.Instance.ReceiveResponse();
-                var response = Serializer.Deserialize<SignupResponse>(info.JsonPayload);
+                var response = Serializer.Deserialize<CreateRoomResponse>(info.JsonPayload);
 
 
                 switch (response.Status)

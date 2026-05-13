@@ -54,7 +54,7 @@ namespace TriviaClient.Views
 
             try
             {
-                var joinReq = new JoinRoomRequest { RoomId = selectedRoom.Id };
+                var joinReq = new JoinRoomRequest { roomId = selectedRoom.Id };
 
                 Communicator.Instance.SendRequest(100, Serializer.Serialize(joinReq));
 
