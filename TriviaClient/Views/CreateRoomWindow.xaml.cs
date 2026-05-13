@@ -25,7 +25,7 @@ namespace TriviaClient.Views
         public CreateRoomWindow()
         {
             InitializeComponent();
-            UsernameText.Text = SessionData.Username;
+            UsernameText.Text = "    " + SessionData.Username;
         }
         private void BackButton_Click(object sender, RoutedEventArgs e)
         {

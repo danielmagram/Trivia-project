@@ -65,7 +65,7 @@ namespace TriviaClient.Views
                 switch (response.Status)
                 {
                     case 1: // SUCCESS
-                        //RoomLobbyWindow lobby = new RoomLobbyWindow(selectedRoom.Id);
+                        //RoomLobbyWindow lobby = new RoomLobbyWindow(selsectedRoom.Id);
                         //lobby.Show();
                         MessageBox.Show("Successfully joined the room!", "Join Successful", MessageBoxButton.OK, MessageBoxImage.Information);
                         this.Close();

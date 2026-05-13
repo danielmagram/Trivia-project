@@ -20,8 +20,11 @@
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
-            <TextBlock Grid.Column="0" x:Name="UsernameText" Text="Hello User" FontSize="18" VerticalAlignment="Center"/>
-
+            <StackPanel Grid.Column="0" HorizontalAlignment="Left">
+                <TextBlock Text="Hello:" FontSize="25" Foreground="ForestGreen"/>
+                <TextBlock x:Name="UsernameText" Text="       User" FontSize="30" FontWeight="Bold" Foreground="Black"/>
+            </StackPanel>
+            
             <TextBlock Grid.Column="1" Text="TRIVIA" FontSize="28" FontWeight="Bold" 
                    HorizontalAlignment="Center" VerticalAlignment="Center"/>
 
