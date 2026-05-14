@@ -141,18 +141,16 @@ void Communicator::handleNewClient(SOCKET clientSocket)
             info.id = code;
             info.receivalTime = time;
 
-
-            IRequestHandler* handler = nullptr;
+            IRequestHandler* currentHandler = nullptr;
             {
                 std::lock_guard<std::mutex> lock(m_clientsMutex);
-                handler = m_clients[clientSocket].get();
+                currentHandler = m_clients[clientSocket].get();
             }
 
             RequestResult result;
-
-            if (handler->isRequestRelevant(info))
+            if (currentHandler->isRequestRelevant(info))
             {
-                result = handler->handleRequest(info);
+                result = currentHandler->handleRequest(info);
             }
             else
             {

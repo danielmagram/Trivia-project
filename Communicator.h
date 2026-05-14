@@ -2,7 +2,7 @@
 
 #include <WinSock2.h>
 #include <Windows.h>
-#include <map>
+#include <unordered_map>
 #include <mutex>
 #include "IRequestHandler.h"
 
@@ -21,7 +21,7 @@ private:
     void handleNewClient(SOCKET clientSocket);
 
     SOCKET m_serverSocket;
-    std::map<SOCKET, std::unique_ptr<IRequestHandler>> m_clients;
+    std::unordered_map<SOCKET, std::unique_ptr<IRequestHandler>> m_clients;
     std::mutex m_clientsMutex;
     RequestHandlerFactory* m_handlerFactory;
 };
