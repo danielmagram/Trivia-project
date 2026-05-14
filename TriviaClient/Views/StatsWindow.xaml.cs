@@ -30,7 +30,7 @@ namespace TriviaClient.Views
             try
             {
                 GetPersonalStatsRequest request = new GetPersonalStatsRequest();
-                UsernameText.Text = "    " + SessionData.Username;
+                UsernameText.Text = SessionData.Username;
                 Communicator.Instance.SendRequest(150, Serializer.Serialize(request));
 
                 ResponseInfo info = Communicator.Instance.ReceiveResponse();
