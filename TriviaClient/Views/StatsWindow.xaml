@@ -20,14 +20,15 @@
             </Grid.ColumnDefinitions>
             <StackPanel Grid.Column="0" HorizontalAlignment="Left">
                 <TextBlock Text="Hello:" FontSize="25" Foreground="ForestGreen"/>
-                <TextBlock x:Name="UsernameText" Text="       User" FontSize="30" FontWeight="Bold" Foreground="Black"/>
+                <TextBlock x:Name="UsernameText" Text="User" FontSize="30" FontWeight="Bold" Foreground="Black" Margin="50,0,0,0"/>
             </StackPanel>
 
             <TextBlock Grid.Column="1" Text="TRIVIA" FontSize="28" FontWeight="Bold" 
                        HorizontalAlignment="Center" VerticalAlignment="Center"/>
 
-            <Button Grid.Column="2" Content="BACK" Width="80" Height="35" 
-                    HorizontalAlignment="Right" Click="BackButton_Click"/>
+            <Button Grid.Column="2" Content="BACK" Width="100" Height="40" 
+        HorizontalAlignment="Right" Background="Red" Foreground="White" BorderThickness="0" FontWeight="Bold" FontSize="15"
+        Click="BackButton_Click"/>
         </Grid>
 
         <StackPanel Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center">

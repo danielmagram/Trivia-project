@@ -23,7 +23,7 @@
 
             <StackPanel Grid.Column="0" HorizontalAlignment="Left">
                 <TextBlock Text="Hello:" FontSize="25" Foreground="ForestGreen"/>
-                <TextBlock x:Name="UsernameText" Text="       User" FontSize="30" FontWeight="Bold" Foreground="Black"/>
+                <TextBlock x:Name="UsernameText" Text="User" FontSize="30" FontWeight="Bold" Foreground="Black" Margin="50,0,0,0"/>
             </StackPanel>
 
             <TextBlock Grid.Column="1" Text="Trivia" FontSize="48" 
@@ -31,7 +31,7 @@
                        VerticalAlignment="Center" Foreground="ForestGreen"/>
 
             <Button Grid.Column="2" Content="Logout" Width="100" Height="40" 
-                    HorizontalAlignment="Right" Background="#E74C3C" Foreground="White" BorderThickness="0" FontWeight="Bold" FontSize="15"
+                    HorizontalAlignment="Right" Background="Red" Foreground="White" BorderThickness="0" FontWeight="Bold" FontSize="15"
                     Click="Logout_Click"/>
         </Grid>
 

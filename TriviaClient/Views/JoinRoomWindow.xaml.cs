@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Windows;
 using TriviaClient.Models;
 using TriviaClient.Networking;
-
+using TriviaClient.State;
 namespace TriviaClient.Views
 {
     public partial class JoinRoomWindow : Window
@@ -65,10 +65,11 @@ namespace TriviaClient.Views
                 switch (response.Status)
                 {
                     case 1: // SUCCESS
-                        RoomLobbyWindow lobby = new RoomLobbyWindow(selectedRoom.Id);
-                        lobby.Show();
                         MessageBox.Show("Successfully joined the room!", "Join Successful", MessageBoxButton.OK, MessageBoxImage.Information);
+                        RoomLobbyWindow lobby = new RoomLobbyWindow();
+                        lobby.Show();
                         this.Close();
+                        SessionData.RoomId = selectedRoom.Id;
                         break;
 
                     case 4: 

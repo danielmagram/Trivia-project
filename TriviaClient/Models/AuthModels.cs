@@ -48,7 +48,7 @@ namespace TriviaClient.Models
     public class GetPlayersInRoomRequest
     {
         [JsonProperty("roomId")]
-        public uint RoomId { get; set; }
+        public uint roomId { get; set; }
     }
 
     public class JoinRoomRequest
