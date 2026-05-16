@@ -27,7 +27,9 @@ bool MenuRequestHandler::isRequestRelevant(const RequestInfo& info) const
     case RequestCode::GET_HIGHSCORE:
     case RequestCode::GET_PERSONAL_STATS:
         return true;
-    return false;
+    default:
+        return false;
+    }
 }
 
 RequestResult MenuRequestHandler::handleRequest(const RequestInfo& info)

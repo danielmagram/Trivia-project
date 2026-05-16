@@ -24,7 +24,7 @@ namespace TriviaClient.Views
         public MenuWindow()
         {
             InitializeComponent();
-            UsernameText.Text = "        " + SessionData.Username;
+            UsernameText.Text = SessionData.Username;
         }
         private void Logout_Click(object sender, RoutedEventArgs e)
         {

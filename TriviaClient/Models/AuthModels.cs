@@ -45,10 +45,10 @@ namespace TriviaClient.Models
         public string Email { get; set; }
     }
 
-    public class GetPlayersInRoomRequest
+    public class GetPlayersInRoomRequest // fix
     {
         [JsonProperty("roomId")]
-        public uint RoomId { get; set; }
+        public uint roomId { get; set; }
     }
 
     public class JoinRoomRequest
@@ -115,9 +115,9 @@ namespace TriviaClient.Models
         public List<RoomData> Rooms { get; set; }
     }
 
-    public class GetPlayersInRoomResponse
+    public class GetPlayersInRoomResponse //fix
     {
-        [JsonProperty("players")]
+        [JsonProperty("PlayersInRoom")]
         public List<string> Players { get; set; }
     }
 
