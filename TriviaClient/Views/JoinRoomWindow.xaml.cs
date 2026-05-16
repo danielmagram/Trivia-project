@@ -65,11 +65,11 @@ namespace TriviaClient.Views
                 switch (response.Status)
                 {
                     case 1: // SUCCESS
+                        SessionData.RoomId = selectedRoom.Id;
                         MessageBox.Show("Successfully joined the room!", "Join Successful", MessageBoxButton.OK, MessageBoxImage.Information);
                         RoomLobbyWindow lobby = new RoomLobbyWindow();
                         lobby.Show();
                         this.Close();
-                        SessionData.RoomId = selectedRoom.Id;
                         break;
 
                     case 4: 
