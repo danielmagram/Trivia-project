@@ -141,18 +141,16 @@ void Communicator::handleNewClient(SOCKET clientSocket)
             info.id = code;
             info.receivalTime = time;
 
-
-			std::unique_ptr<IRequestHandler> handler;
+            IRequestHandler* currentHandler = nullptr;
             {
                 std::lock_guard<std::mutex> lock(m_clientsMutex);
-                handler = std::move(m_clients[clientSocket]);
+                currentHandler = m_clients[clientSocket].get();
             }
 
             RequestResult result;
-
-            if (handler->isRequestRelevant(info))
+            if (currentHandler->isRequestRelevant(info))
             {
-                result = handler->handleRequest(info);
+                result = currentHandler->handleRequest(info);
             }
             else
             {
@@ -190,9 +188,16 @@ void Communicator::handleNewClient(SOCKET clientSocket)
 
     {
         std::lock_guard<std::mutex> lock(m_clientsMutex);
-        if (m_clients.find(clientSocket) != m_clients.end())
+
+        
+        auto it = m_clients.find(clientSocket);
+        if (it != m_clients.end())
         {
-            m_clients.erase(clientSocket);
+            // 1. Tell the handler the socket died
+            it->second->onClientDisconnected();
+
+            // 2. Safely erase the handler and socket from the map
+            m_clients.erase(it);
         }
     }
 }

@@ -13,12 +13,23 @@ MenuRequestHandler::MenuRequestHandler(RequestHandlerFactory& factory, std::stri
 
 }
 
+
+
 bool MenuRequestHandler::isRequestRelevant(const RequestInfo& info) const
 {
     RequestCode code = static_cast<RequestCode>(info.id);
-    if(code >= RequestCode::JOIN_ROOM && code <= RequestCode::GET_HIGHSCORE)
+    switch (code)
+    {
+    case RequestCode::GET_ROOMS:
+    case RequestCode::GET_PLAYERS:
+    case RequestCode::JOIN_ROOM:
+    case RequestCode::CREATE_ROOM:
+    case RequestCode::GET_HIGHSCORE:
+    case RequestCode::GET_PERSONAL_STATS:
         return true;
-    return false;
+    default:
+        return false;
+    }
 }
 
 RequestResult MenuRequestHandler::handleRequest(const RequestInfo& info)
@@ -52,6 +63,11 @@ RequestResult MenuRequestHandler::handleRequest(const RequestInfo& info)
     }
 
     return RequestResult();
+}
+
+void MenuRequestHandler::onClientDisconnected()
+{
+    m_handlerFactory.getLoginManager().logout(m_user.getUsername());
 }
 
 RequestResult MenuRequestHandler::signout(const RequestInfo& info)
@@ -133,23 +149,21 @@ RequestResult MenuRequestHandler::joinRoom(const RequestInfo& info)
 			response.status = static_cast<unsigned int>(Status::SUCCESS);
 		}
 		else {
-			ErrorResponse err;
-			err.message = "Room is full";
-			result.response = JsonResponsePacketSerializer::serializeResponse(err);
-			response.status = static_cast<unsigned int>(Status::ROOM_FULL);
+            response.status = static_cast<unsigned int>(Status::ROOM_FULL);
+            result.response = JsonResponsePacketSerializer::serializeResponse(response);
+            result.newHandler = nullptr;
             return result;
 		}
 	}
 	else 
 	{
-		ErrorResponse err;
-		err.message = "Room not found";
-		result.response = JsonResponsePacketSerializer::serializeResponse(err);
+		
         response.status = static_cast<unsigned int>(Status::ROOM_NOT_FOUND);
-		return result;
+        result.response = JsonResponsePacketSerializer::serializeResponse(response);
+        result.newHandler = nullptr;
+        return result;
     }
     result.response = JsonResponsePacketSerializer::serializeResponse(response);
-    result.newHandler = m_handlerFactory.createMenuRequestHandler(m_user.getUsername());
     return result;
 }
 
@@ -163,7 +177,7 @@ RequestResult MenuRequestHandler::createRoom(const RequestInfo& info)
     data.maxPlayers = request.maxUsers;
     data.numOfQuestionsInGame = request.questionCount;
     data.timePerQuestion = request.answerTimeout;
-    data.status = 0;
+    data.status = 1;
     m_handlerFactory.getRoomManager().createRoom(m_user, data);
 
     

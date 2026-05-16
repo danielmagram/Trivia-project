@@ -45,6 +45,10 @@ RequestResult LoginRequestHandler::handleRequest(const RequestInfo& info)
     return result;
 }
 
+void LoginRequestHandler::onClientDisconnected()
+{
+}
+
 
 
 RequestResult LoginRequestHandler::login(const RequestInfo& info)
