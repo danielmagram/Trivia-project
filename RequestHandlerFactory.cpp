@@ -1,6 +1,8 @@
 #include "RequestHandlerFactory.h"
 #include "LoginRequestHandler.h"
 #include "MenuRequestHandler.h"
+#include "RoomAdminRequestHandler.h"
+#include "RoomMemberRequestHandler.h"
 #include "SqliteDatabase.h"
 
 RequestHandlerFactory::RequestHandlerFactory()
@@ -24,6 +26,16 @@ std::unique_ptr<IRequestHandler> RequestHandlerFactory::createLoginRequestHandle
 std::unique_ptr<IRequestHandler> RequestHandlerFactory::createMenuRequestHandler(const std::string& user)
 {
     return std::make_unique<MenuRequestHandler>(*this, user);
+}
+
+std::unique_ptr<IRequestHandler> RequestHandlerFactory::createRoomAdminRequestHandler(LoggedUser loggedUser, Room* room)
+{
+	return std::make_unique<RoomAdminRequestHandler>(*this, loggedUser, room);
+}
+
+std::unique_ptr<IRequestHandler> RequestHandlerFactory::createRoomMemberRequestHandler(LoggedUser loggedUser, Room* room)
+{
+	return std::make_unique<RoomMemberRequestHandler>(*this, loggedUser, room);
 }
 
 LoginManager& RequestHandlerFactory::getLoginManager()

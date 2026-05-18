@@ -185,5 +185,6 @@ RequestResult MenuRequestHandler::createRoom(const RequestInfo& info)
     response.status = static_cast<unsigned int>(Status::SUCCESS);
 
     result.response = JsonResponsePacketSerializer::serializeResponse(response);
+	result.newHandler = m_handlerFactory.createRoomAdminRequestHandler(m_user, m_handlerFactory.getRoomManager().getRoomById(data.id));
     return result;
 }
