@@ -136,7 +136,9 @@
     <ClInclude Include="..\Question.h" />
     <ClInclude Include="..\RequestHandlerFactory.h" />
     <ClInclude Include="..\Room.h" />
+    <ClInclude Include="..\RoomAdminRequestHandler.h" />
     <ClInclude Include="..\RoomManager.h" />
+    <ClInclude Include="..\RoomMemberRequestHandler.h" />
     <ClInclude Include="..\Server.h" />
     <ClInclude Include="..\LoginRequestHandler.h" />
     <ClInclude Include="..\Communicator.h" />
@@ -156,7 +158,9 @@
     <ClCompile Include="..\Question.cpp" />
     <ClCompile Include="..\RequestHandlerFactory.cpp" />
     <ClCompile Include="..\Room.cpp" />
+    <ClCompile Include="..\RoomAdminRequestHandler.cpp" />
     <ClCompile Include="..\RoomManager.cpp" />
+    <ClCompile Include="..\RoomMemberRequestHandler.cpp" />
     <ClCompile Include="..\Server.cpp" />
     <ClCompile Include="..\sqlite3.c" />
     <ClCompile Include="..\SqliteDatabase.cpp" />

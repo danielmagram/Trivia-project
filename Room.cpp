@@ -26,3 +26,8 @@ RoomData Room::getMetadata() const
 {
 	return m_metadata;
 }
+
+RoomData& Room::getMetadata()
+{
+	return m_metadata;
+}
