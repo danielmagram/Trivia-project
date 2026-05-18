@@ -120,3 +120,35 @@ std::vector<unsigned char> JsonResponsePacketSerializer::serializeResponse(const
 
     return buildPacket(static_cast<unsigned char>(RequestCode::GET_PERSONAL_STATS), j);
 }
+
+std::vector<unsigned char> JsonResponsePacketSerializer::serializeResponse(const CloseRoomResponse& response)
+{
+    json j;
+    j["status"] = response.status;
+	return buildPacket(static_cast<unsigned char>(RequestCode::CLOSE_ROOM), j);
+}
+
+std::vector<unsigned char> JsonResponsePacketSerializer::serializeResponse(const StartGameResponse& response)
+{
+    json j;
+    j["status"] = response.status;
+    return buildPacket(static_cast<unsigned char>(RequestCode::START_GAME), j);
+}
+
+std::vector<unsigned char> JsonResponsePacketSerializer::serializeResponse(const GetRoomStateResponse& response)
+{
+    json j;
+    j["status"] = response.status;
+    j["hasGameBegun"] = response.hasGameBegun;
+    j["players"] = response.players;
+    j["questionCount"] = response.questionCount;
+    j["answerTimeout"] = response.answerTimeout;
+    return buildPacket(static_cast<unsigned char>(RequestCode::GET_ROOM_STATE), j);
+}
+
+std::vector<unsigned char> JsonResponsePacketSerializer::serializeResponse(const LeaveRoomResponse& response)
+{
+    json j;
+    j["status"] = response.status;
+    return buildPacket(static_cast<unsigned char>(RequestCode::LEAVE_ROOM), j);
+}

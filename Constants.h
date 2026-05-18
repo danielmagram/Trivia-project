@@ -10,7 +10,11 @@ enum class RequestCode : unsigned char {
     GET_ROOMS = 102,
     GET_PLAYERS = 105,
     GET_HIGHSCORE = 140,
-    GET_PERSONAL_STATS = 150
+    GET_PERSONAL_STATS = 150,
+	CLOSE_ROOM = 151,
+	START_GAME = 152,
+	GET_ROOM_STATE = 153,
+	LEAVE_ROOM = 154,
 };
 
 
