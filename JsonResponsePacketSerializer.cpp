@@ -140,7 +140,14 @@ std::vector<unsigned char> JsonResponsePacketSerializer::serializeResponse(const
     json j;
     j["status"] = response.status;
     j["hasGameBegun"] = response.hasGameBegun;
-    j["players"] = response.players;
+
+    // Convert vector<LoggedUser> to vector<string>
+    json playersArray = json::array();
+    for (const auto& user : response.players) {
+        playersArray.push_back(user.getUsername());
+    }
+    j["players"] = playersArray;
+
     j["questionCount"] = response.questionCount;
     j["answerTimeout"] = response.answerTimeout;
     return buildPacket(static_cast<unsigned char>(RequestCode::GET_ROOM_STATE), j);

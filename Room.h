@@ -20,6 +20,7 @@ class Room
 public:
 	Room(const RoomData& metadata);
 	RoomData getMetadata() const;
+	RoomData& getMetadata();
 	std::vector<LoggedUser> getAllUsers() const;
 	void addUser(const LoggedUser& user);
 	void removeUser(const std::string& username);	
