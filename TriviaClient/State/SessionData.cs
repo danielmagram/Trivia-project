@@ -7,6 +7,7 @@
 
         // Which room are they in? (-1 means they are in the menu)
         public static int RoomId { get; set; } = -1;
+        public static bool IsAdmin { get; set; }
 
 
         // Call this when the user logs out
@@ -14,6 +15,7 @@
         {
             Username = null;
             RoomId = -1;
+            IsAdmin = false;
         }
     }
 }

@@ -64,9 +64,12 @@ namespace TriviaClient.Views
                 // Handle server status responses
                 switch (response.Status)
                 {
-                    case 1: // SUCCESS
-                        SessionData.RoomId = selectedRoom.Id;
+                   case 1: // SUCCESS
                         MessageBox.Show("Successfully joined the room!", "Join Successful", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                        SessionData.IsAdmin = false; 
+                        SessionData.RoomId = (int)selectedRoom.Id;
+
                         RoomLobbyWindow lobby = new RoomLobbyWindow();
                         lobby.Show();
                         this.Close();

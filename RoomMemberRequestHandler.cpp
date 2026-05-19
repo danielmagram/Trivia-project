@@ -44,10 +44,9 @@ RequestResult RoomMemberRequestHandler::getRoomState(const RequestInfo& info) co
 	// get the room state from the room manager
     Room* room = m_handlerFactory.getRoomManager().getRoomById(m_room->getMetadata().id);
     if (room == nullptr) {
-        ErrorResponse err;
-        err.message = "Room not found";
-        result.response = JsonResponsePacketSerializer::serializeResponse(err);
-        return result;
+		response.status = static_cast<unsigned int>(Status::ROOM_NOT_FOUND);
+        result.response = JsonResponsePacketSerializer::serializeResponse(response);
+		return result;
     }
     
     response.status = static_cast<unsigned int>(Status::SUCCESS);
