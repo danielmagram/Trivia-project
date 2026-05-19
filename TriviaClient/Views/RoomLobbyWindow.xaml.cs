@@ -15,6 +15,7 @@ namespace TriviaClient.Views
         private const byte CLOSE_ROOM_CODE = 151;
         private const byte START_GAME_CODE = 152;
         private const byte LEAVE_ROOM_CODE = 154;
+        private const byte ROOM_CLOSED_BY_ADMIN_CODE = 155;
 
         public RoomLobbyWindow()
         {   
@@ -60,6 +61,14 @@ namespace TriviaClient.Views
                 if (response.Players.Count == 0)
                 {
                     HandleRoomClosedByAdmin("admin closed the room");
+                    Communicator.Instance.SendRequest(ROOM_CLOSED_BY_ADMIN_CODE, Serializer.Serialize(new LeaveRoomRequest()));
+                    ResponseInfo info2 = Communicator.Instance.ReceiveResponse();
+                    var response2 = Serializer.Deserialize<CloseRoomResponse>(info2.JsonPayload);
+                    if (response.Status != 5)
+                    {
+                        MessageBox.Show("Error notifying server of room closure.");
+                    }
+
                     return;
                 }
                 if (response.Status == 5)

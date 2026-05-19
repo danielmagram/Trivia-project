@@ -15,6 +15,7 @@ enum class RequestCode : unsigned char {
 	START_GAME = 152,
 	GET_ROOM_STATE = 153,
 	LEAVE_ROOM = 154,
+	ADMIN_CLOSED_ROOM = 155,
 };
 
 
