@@ -52,20 +52,22 @@ namespace TriviaClient.Views
 
                 ResponseInfo info = Communicator.Instance.ReceiveResponse();
 
-                if (info.Code == 5) 
-                {
-                    HandleRoomClosedByAdmin("room not found");
-                    return;
-                }
+                
 
                 var response = Serializer.Deserialize<GetRoomStateResponse>(info.JsonPayload);
 
                 // Update the visual player list
-                if (response.Players != null)
+                if (response.Players.Count == 0)
                 {
-                    ListPlayers.ItemsSource = response.Players;
+                    HandleRoomClosedByAdmin("admin closed the room");
+                    return;
                 }
-
+                if (response.Status == 5)
+                {
+                    HandleRoomClosedByAdmin("room not found");
+                    return;
+                }
+                ListPlayers.ItemsSource = response.Players;
                 // If the admin started the game, transition immediately!
                 if (response.HasGameBegun)
                 {
