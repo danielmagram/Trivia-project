@@ -45,6 +45,7 @@ namespace TriviaClient.Views
         {
             try
             {
+
                 Communicator.Instance.SendRequest(GET_ROOM_STATE_CODE, Serializer.Serialize(new GetRoomStateRequest()));
 
                 ResponseInfo info = Communicator.Instance.ReceiveResponse();
@@ -52,6 +53,15 @@ namespace TriviaClient.Views
                 
 
                 var response = Serializer.Deserialize<GetRoomStateResponse>(info.JsonPayload);
+                if (response.HasGameBegun)
+                {
+                    _pollingTimer.Stop();
+                    MessageBox.Show("The game is starting!", "Game Start", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                    // GameWindow gameWin = new GameWindow();
+                    // gameWin.Show();
+                    this.Close();
+                }
 
                 if (response.Players.Count == 0)
                 {
@@ -72,15 +82,7 @@ namespace TriviaClient.Views
                     return;
                 }
                 ListPlayers.ItemsSource = response.Players;
-                if (response.HasGameBegun)
-                {
-                    _pollingTimer.Stop();
-                    MessageBox.Show("The game is starting!", "Game Start", MessageBoxButton.OK, MessageBoxImage.Information);
 
-                    // GameWindow gameWin = new GameWindow();
-                    // gameWin.Show();
-                    this.Close();
-                }
             }
             catch (Exception)
             {
@@ -141,6 +143,9 @@ namespace TriviaClient.Views
             try
             {
                 Communicator.Instance.SendRequest(START_GAME_CODE, Serializer.Serialize(new StartGameRequest()));
+                    Communicator.Instance.ReceiveResponse(); // Await confirmation response
+
+
             }
             catch (Exception ex)
             {
