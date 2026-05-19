@@ -72,8 +72,11 @@ namespace TriviaClient.Views
                 {
                     case 1: // SUCCESS
                         MessageBox.Show("Room created successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
-                        MenuWindow menu = new MenuWindow();
-                        menu.Show();
+
+                        // Set role tracking
+                        SessionData.IsAdmin = true;
+                        RoomLobbyWindow lobby = new RoomLobbyWindow();
+                        lobby.Show();
                         this.Close();
                         break;
 
