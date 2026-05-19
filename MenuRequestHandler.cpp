@@ -147,6 +147,7 @@ RequestResult MenuRequestHandler::joinRoom(const RequestInfo& info)
 		if (countPlayers < maxPlayers) {
 			room->addUser(m_user);
 			response.status = static_cast<unsigned int>(Status::SUCCESS);
+			result.newHandler = m_handlerFactory.createRoomMemberRequestHandler(m_user, room);
 		}
 		else {
             response.status = static_cast<unsigned int>(Status::ROOM_FULL);
