@@ -26,7 +26,6 @@ namespace TriviaClient.Views
             _pollingTimer.Interval = TimeSpan.FromSeconds(1.5);
             _pollingTimer.Tick += (s, e) => PollRoomState();
 
-            // 2. Set up button visibilities based on user role
             if (SessionData.IsAdmin)
             {
                 BtnStartGame.Visibility = Visibility.Visible;
@@ -37,10 +36,8 @@ namespace TriviaClient.Views
                 BtnLeaveRoom.Visibility = Visibility.Visible;
             }
 
-            // 3. Query initial room state 
             PollRoomState();
 
-            // 4. Start the timer loop if the initial poll didn't crash/exit
             _pollingTimer.Start();
         }
 
@@ -48,7 +45,6 @@ namespace TriviaClient.Views
         {
             try
             {
-                // Send GET_ROOM_STATE request to the server
                 Communicator.Instance.SendRequest(GET_ROOM_STATE_CODE, Serializer.Serialize(new GetRoomStateRequest()));
 
                 ResponseInfo info = Communicator.Instance.ReceiveResponse();
@@ -57,7 +53,6 @@ namespace TriviaClient.Views
 
                 var response = Serializer.Deserialize<GetRoomStateResponse>(info.JsonPayload);
 
-                // Update the visual player list
                 if (response.Players.Count == 0)
                 {
                     HandleRoomClosedByAdmin("admin closed the room");
@@ -77,7 +72,6 @@ namespace TriviaClient.Views
                     return;
                 }
                 ListPlayers.ItemsSource = response.Players;
-                // If the admin started the game, transition immediately!
                 if (response.HasGameBegun)
                 {
                     _pollingTimer.Stop();
