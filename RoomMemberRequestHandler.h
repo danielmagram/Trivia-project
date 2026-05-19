@@ -17,6 +17,7 @@ public:
 	RequestResult getRoomState(const RequestInfo& info) const;
 	void onClientDisconnected() override;
 	RequestResult leaveRoom(const RequestInfo& info);
+	RequestResult adminClosedRoom();
 private:
 	RequestHandlerFactory& m_handlerFactory;
 	RoomManager& m_roomManager;

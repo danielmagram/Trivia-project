@@ -9,7 +9,7 @@ RoomMemberRequestHandler::RoomMemberRequestHandler(RequestHandlerFactory& factor
 bool RoomMemberRequestHandler::isRequestRelevant(const RequestInfo& info) const
 {
     RequestCode code = static_cast<RequestCode>(info.id);
-	return (code == RequestCode::GET_ROOM_STATE || code == RequestCode::LEAVE_ROOM);
+    return (code == RequestCode::GET_ROOM_STATE || code == RequestCode::LEAVE_ROOM || code == RequestCode::ADMIN_CLOSED_ROOM);
 }
 
 RequestResult RoomMemberRequestHandler::handleRequest(const RequestInfo& info)
@@ -26,6 +26,10 @@ RequestResult RoomMemberRequestHandler::handleRequest(const RequestInfo& info)
         {
             return leaveRoom(info); 
         }
+        else if (info.id == static_cast<unsigned char>(RequestCode::ADMIN_CLOSED_ROOM)) // ADMIN_CLOSED_ROOM
+        {
+            return adminClosedRoom(); 
+		}
     }
     catch (...)
     {
@@ -92,3 +96,16 @@ RequestResult RoomMemberRequestHandler::leaveRoom(const RequestInfo& info)
     }
     return result;
 }
+
+RequestResult RoomMemberRequestHandler::adminClosedRoom()
+{
+	// This function is called when the admin of the room closes it. It should notify the member that the room has been closed and return them to the menu.
+	RequestResult result;
+	CloseRoomResponse response;
+	response.status = static_cast<unsigned int>(Status::ROOM_NOT_FOUND);
+	result.response = JsonResponsePacketSerializer::serializeResponse(response);
+	result.newHandler = m_handlerFactory.createMenuRequestHandler(m_user.getUsername());
+	return result;
+}
+
+

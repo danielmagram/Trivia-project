@@ -15,6 +15,7 @@ namespace TriviaClient.Views
         private const byte CLOSE_ROOM_CODE = 151;
         private const byte START_GAME_CODE = 152;
         private const byte LEAVE_ROOM_CODE = 154;
+        private const byte ROOM_CLOSED_BY_ADMIN_CODE = 155;
 
         public RoomLobbyWindow()
         {   
@@ -25,7 +26,6 @@ namespace TriviaClient.Views
             _pollingTimer.Interval = TimeSpan.FromSeconds(1.5);
             _pollingTimer.Tick += (s, e) => PollRoomState();
 
-            // 2. Set up button visibilities based on user role
             if (SessionData.IsAdmin)
             {
                 BtnStartGame.Visibility = Visibility.Visible;
@@ -36,10 +36,8 @@ namespace TriviaClient.Views
                 BtnLeaveRoom.Visibility = Visibility.Visible;
             }
 
-            // 3. Query initial room state 
             PollRoomState();
 
-            // 4. Start the timer loop if the initial poll didn't crash/exit
             _pollingTimer.Start();
         }
 
@@ -47,26 +45,33 @@ namespace TriviaClient.Views
         {
             try
             {
-                // Send GET_ROOM_STATE request to the server
                 Communicator.Instance.SendRequest(GET_ROOM_STATE_CODE, Serializer.Serialize(new GetRoomStateRequest()));
 
                 ResponseInfo info = Communicator.Instance.ReceiveResponse();
 
-                if (info.Code == 5) 
+                
+
+                var response = Serializer.Deserialize<GetRoomStateResponse>(info.JsonPayload);
+
+                if (response.Players.Count == 0)
+                {
+                    HandleRoomClosedByAdmin("admin closed the room");
+                    Communicator.Instance.SendRequest(ROOM_CLOSED_BY_ADMIN_CODE, Serializer.Serialize(new LeaveRoomRequest()));
+                    ResponseInfo info2 = Communicator.Instance.ReceiveResponse();
+                    var response2 = Serializer.Deserialize<CloseRoomResponse>(info2.JsonPayload);
+                    if (response.Status != 5)
+                    {
+                        MessageBox.Show("Error notifying server of room closure.");
+                    }
+
+                    return;
+                }
+                if (response.Status == 5)
                 {
                     HandleRoomClosedByAdmin("room not found");
                     return;
                 }
-
-                var response = Serializer.Deserialize<GetRoomStateResponse>(info.JsonPayload);
-
-                // Update the visual player list
-                if (response.Players != null)
-                {
-                    ListPlayers.ItemsSource = response.Players;
-                }
-
-                // If the admin started the game, transition immediately!
+                ListPlayers.ItemsSource = response.Players;
                 if (response.HasGameBegun)
                 {
                     _pollingTimer.Stop();
