@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Windows;
+using System.Windows.Threading;
 using TriviaClient.Models;
 using TriviaClient.Networking;
 using TriviaClient.State;
@@ -8,9 +9,21 @@ namespace TriviaClient.Views
 {
     public partial class JoinRoomWindow : Window
     {
+
+        private readonly DispatcherTimer _refreshTimer;
         public JoinRoomWindow()
         {
             InitializeComponent();
+            LoadRooms();
+
+            _refreshTimer = new DispatcherTimer();
+            _refreshTimer.Interval = TimeSpan.FromSeconds(3);
+            _refreshTimer.Tick += Timer_Tick;
+            _refreshTimer.Start();
+        }
+
+        private void Timer_Tick(object sender, EventArgs e)
+        {
             LoadRooms();
         }
 
@@ -66,7 +79,7 @@ namespace TriviaClient.Views
                 {
                    case 1: // SUCCESS
                         MessageBox.Show("Successfully joined the room!", "Join Successful", MessageBoxButton.OK, MessageBoxImage.Information);
-
+                        _refreshTimer.Stop();
                         SessionData.IsAdmin = false; 
                         SessionData.RoomId = (int)selectedRoom.Id;
 
