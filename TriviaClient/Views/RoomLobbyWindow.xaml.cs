@@ -7,18 +7,21 @@ using TriviaClient.State;
 
 namespace TriviaClient.Views
 {
+    public enum RoomCommand
+    {
+        CloseRoom = 151,
+        StartGame = 152,
+        GetRoomState = 153,
+        LeaveRoom = 154,
+        RoomClosedByAdmin = 155
+    }
+
     public partial class RoomLobbyWindow : Window
     {
         private DispatcherTimer _pollingTimer;
 
-        private const byte GET_ROOM_STATE_CODE = 153;
-        private const byte CLOSE_ROOM_CODE = 151;
-        private const byte START_GAME_CODE = 152;
-        private const byte LEAVE_ROOM_CODE = 154;
-        private const byte ROOM_CLOSED_BY_ADMIN_CODE = 155;
-
         public RoomLobbyWindow()
-        {   
+        {
             InitializeComponent();
             UsernameText.Text = SessionData.Username;
 
@@ -43,46 +46,45 @@ namespace TriviaClient.Views
 
         private void PollRoomState()
         {
+            _pollingTimer.Stop(); 
             try
             {
-
-                Communicator.Instance.SendRequest(GET_ROOM_STATE_CODE, Serializer.Serialize(new GetRoomStateRequest()));
-
+                Communicator.Instance.SendRequest((byte)RoomCommand.GetRoomState, Serializer.Serialize(new GetRoomStateRequest()));
                 ResponseInfo info = Communicator.Instance.ReceiveResponse();
-
-                
-
                 var response = Serializer.Deserialize<GetRoomStateResponse>(info.JsonPayload);
-                if (response.HasGameBegun)
-                {
-                    _pollingTimer.Stop();
-                    MessageBox.Show("The game is starting!", "Game Start", MessageBoxButton.OK, MessageBoxImage.Information);
 
-                    // GameWindow gameWin = new GameWindow();
-                    // gameWin.Show();
-                    this.Close();
-                }
-
-                if (response.Players.Count == 0)
-                {
-                    HandleRoomClosedByAdmin("admin closed the room");
-                    Communicator.Instance.SendRequest(ROOM_CLOSED_BY_ADMIN_CODE, Serializer.Serialize(new LeaveRoomRequest()));
-                    ResponseInfo info2 = Communicator.Instance.ReceiveResponse();
-                    var response2 = Serializer.Deserialize<CloseRoomResponse>(info2.JsonPayload);
-                    if (response.Status != 5)
-                    {
-                        MessageBox.Show("Error notifying server of room closure.");
-                    }
-
-                    return;
-                }
                 if (response.Status == 5)
                 {
                     HandleRoomClosedByAdmin("room not found");
                     return;
                 }
-                ListPlayers.ItemsSource = response.Players;
 
+                if (response.HasGameBegun)
+                {
+                    MessageBox.Show("The game is starting!", "Game Start", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                    MenuWindow menu = new MenuWindow(); // note: later will change to GameWindow
+                    menu.Show();
+                    this.Close();
+                    return;
+                }
+
+                if (response.Players.Count == 0)
+                {
+                    HandleRoomClosedByAdmin("admin closed the room");
+
+                    try
+                    {
+                        Communicator.Instance.SendRequest((byte)RoomCommand.RoomClosedByAdmin, Serializer.Serialize(new LeaveRoomRequest()));
+                        Communicator.Instance.ReceiveResponse();
+                    }
+                    catch { /* Safe to ignore network failure on cleanup */ }
+
+                    return;
+                }
+
+                ListPlayers.ItemsSource = response.Players;
+                _pollingTimer.Start();
             }
             catch (Exception)
             {
@@ -94,6 +96,9 @@ namespace TriviaClient.Views
         {
             _pollingTimer.Stop();
             MessageBox.Show(message, "Room Closed", MessageBoxButton.OK, MessageBoxImage.Warning);
+            Communicator.Instance.SendRequest((byte)RoomCommand.RoomClosedByAdmin, Serializer.Serialize(new LeaveRoomRequest()));
+            Communicator.Instance.ReceiveResponse();
+
 
             MenuWindow menu = new MenuWindow();
             menu.Show();
@@ -105,10 +110,11 @@ namespace TriviaClient.Views
             try
             {
                 _pollingTimer.Stop();
-                Communicator.Instance.SendRequest(LEAVE_ROOM_CODE, Serializer.Serialize(new LeaveRoomRequest()));
+
+                Communicator.Instance.SendRequest((byte)RoomCommand.LeaveRoom, Serializer.Serialize(new LeaveRoomRequest()));
                 Communicator.Instance.ReceiveResponse(); // Await confirmation response
 
-                MenuWindow window = new MenuWindow();
+                MenuWindow window = new MenuWindow(); 
                 window.Show();
                 this.Close();
             }
@@ -124,10 +130,11 @@ namespace TriviaClient.Views
             try
             {
                 _pollingTimer.Stop();
-                Communicator.Instance.SendRequest(CLOSE_ROOM_CODE, Serializer.Serialize(new CloseRoomRequest()));
+
+                Communicator.Instance.SendRequest((byte)RoomCommand.CloseRoom, Serializer.Serialize(new CloseRoomRequest()));
                 Communicator.Instance.ReceiveResponse();
 
-                MenuWindow window = new MenuWindow();
+                MenuWindow window = new MenuWindow();// note: later will change to GameWindow
                 window.Show();
                 this.Close();
             }
@@ -142,14 +149,21 @@ namespace TriviaClient.Views
         {
             try
             {
-                Communicator.Instance.SendRequest(START_GAME_CODE, Serializer.Serialize(new StartGameRequest()));
-                    Communicator.Instance.ReceiveResponse(); // Await confirmation response
+                _pollingTimer.Stop();
 
+                Communicator.Instance.SendRequest((byte)RoomCommand.StartGame, Serializer.Serialize(new StartGameRequest()));
+                Communicator.Instance.ReceiveResponse(); 
 
+                MessageBox.Show("Game starting! (Returning to Menu phase)", "Game Starting", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                MenuWindow menu = new MenuWindow();
+                menu.Show();
+                this.Close();
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Error starting game: {ex.Message}");
+                _pollingTimer.Start();
             }
         }
     }

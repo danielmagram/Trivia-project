@@ -2,9 +2,8 @@
 #include "RoomAdminRequestHandler.h"
 #include "jsonResponsePacketSerializer.h"
 
-
-RoomAdminRequestHandler::RoomAdminRequestHandler(RequestHandlerFactory& factory, LoggedUser user, Room* room) 
-	: m_handlerFactory(factory), m_user(user), m_room(room), m_roomManager(factory.getRoomManager())
+RoomAdminRequestHandler::RoomAdminRequestHandler(RequestHandlerFactory& factory, LoggedUser user, Room* room)
+	: RoomRequestHandler(factory, user, room)
 {
 }
 
@@ -40,29 +39,6 @@ RequestResult RoomAdminRequestHandler::handleRequest(const RequestInfo& info)
 		result.response = JsonResponsePacketSerializer::serializeResponse(err);
 		result.newHandler = nullptr;
 	}
-	return result;
-}
-
-RequestResult RoomAdminRequestHandler::getRoomState(const RequestInfo& info) const
-{
-	RequestResult result;
-	GetRoomStateResponse response;
-	// get the room state from the room manager
-	Room* room = m_handlerFactory.getRoomManager().getRoomById(m_room->getMetadata().id);
-	if (room == nullptr) {
-		ErrorResponse err;
-		err.message = "Room not found";
-		result.response = JsonResponsePacketSerializer::serializeResponse(err);
-		return result;
-	}
-
-	response.status = static_cast<unsigned int>(Status::SUCCESS);
-	response.hasGameBegun = room->getMetadata().status == 1; // 1 - mean active, 0 - waiting for players
-	response.players = room->getAllUsers();
-	response.questionCount = room->getMetadata().numOfQuestionsInGame;
-	response.answerTimeout = static_cast<float>(room->getMetadata().timePerQuestion);
-
-	result.response = JsonResponsePacketSerializer::serializeResponse(response);
 	return result;
 }
 
