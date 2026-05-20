@@ -17,9 +17,14 @@ void Room::addUser(const LoggedUser& user)
 
 void Room::removeUser(const std::string& username)
 {
-	m_users.erase(std::remove_if(m_users.begin(), m_users.end(),
-		[&username](const LoggedUser& user) { return user.getUsername() == username; }),
-		m_users.end());
+	try {
+		m_users.erase(std::remove_if(m_users.begin(), m_users.end(),
+			[&username](const LoggedUser& user) { return user.getUsername() == username; }),
+			m_users.end());
+	}
+	catch (const std::exception& e) {
+		std::cerr << "Error removing user: " << e.what() << std::endl;
+	}
 }
 
 RoomData Room::getMetadata() const
