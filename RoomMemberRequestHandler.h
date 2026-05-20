@@ -1,26 +1,18 @@
 #pragma once
-#include "RequestHandlerFactory.h"
-#include "RoomManager.h"
-#include "LoggedUser.h"
-#include "constants.h"
+#include "RoomRequestHandler.h" 
 #include "JsonRequestPacketDeserializer.h"
 #include "JsonResponsePacketSerializer.h"
 
-class RequestHandlerFactory;
-
-class RoomMemberRequestHandler : public IRequestHandler
+class RoomMemberRequestHandler : public RoomRequestHandler
 {
 public:
-	RoomMemberRequestHandler(RequestHandlerFactory& factory, LoggedUser user, Room* room);
-	bool isRequestRelevant(const RequestInfo& info) const override;
-	RequestResult handleRequest(const RequestInfo& info) override;
-	RequestResult getRoomState(const RequestInfo& info) const;
-	void onClientDisconnected() override;
-	RequestResult leaveRoom(const RequestInfo& info);
-	RequestResult adminClosedRoom();
-private:
-	RequestHandlerFactory& m_handlerFactory;
-	RoomManager& m_roomManager;
-	LoggedUser m_user;
-	Room* m_room;
+    RoomMemberRequestHandler(RequestHandlerFactory& factory, LoggedUser user, Room* room);
+
+    bool isRequestRelevant(const RequestInfo& info) const override;
+    RequestResult handleRequest(const RequestInfo& info) override;
+    void onClientDisconnected() override;
+
+    RequestResult leaveRoom(const RequestInfo& info);
+    RequestResult adminClosedRoom();
+
 };
