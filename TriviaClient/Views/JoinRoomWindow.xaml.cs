@@ -24,7 +24,9 @@ namespace TriviaClient.Views
 
         private void Timer_Tick(object sender, EventArgs e)
         {
+            _refreshTimer.Stop();
             LoadRooms();
+            _refreshTimer.Start();
         }
 
         private void LoadRooms()
@@ -80,6 +82,7 @@ namespace TriviaClient.Views
                 switch (response.Status)
                 {
                    case 1: // SUCCESS
+                        _refreshTimer.Stop();
                         MessageBox.Show("Successfully joined the room!", "Join Successful", MessageBoxButton.OK, MessageBoxImage.Information);
                         
                         SessionData.IsAdmin = false; 
@@ -117,6 +120,7 @@ namespace TriviaClient.Views
 
         private void btnBack_Click(object sender, RoutedEventArgs e)
         {
+            _refreshTimer.Stop();
             MenuWindow menu = new MenuWindow();
             menu.Show();
             this.Close();

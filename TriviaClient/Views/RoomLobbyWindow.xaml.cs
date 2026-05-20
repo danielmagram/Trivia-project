@@ -46,6 +46,7 @@ namespace TriviaClient.Views
 
         private void PollRoomState()
         {
+            _pollingTimer.Stop();
             try
             {
                 Communicator.Instance.SendRequest((byte)RoomCommand.GetRoomState, Serializer.Serialize(new GetRoomStateRequest()));
@@ -53,15 +54,6 @@ namespace TriviaClient.Views
                 ResponseInfo info = Communicator.Instance.ReceiveResponse();
 
                 var response = Serializer.Deserialize<GetRoomStateResponse>(info.JsonPayload);
-                if (response.HasGameBegun)
-                {
-                    _pollingTimer.Stop();
-                    MessageBox.Show("The game is starting!", "Game Start", MessageBoxButton.OK, MessageBoxImage.Information);
-
-                    // GameWindow gameWin = new GameWindow();
-                    // gameWin.Show();
-                    this.Close();
-                }
 
                 if (response.Players.Count == 0)
                 {
@@ -76,6 +68,19 @@ namespace TriviaClient.Views
                     }
 
                     return;
+                }
+                if (response.HasGameBegun)
+                {
+                    _pollingTimer.Stop();
+                    MessageBox.Show("The game is starting!", "Game Start", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                    // GameWindow gameWin = new GameWindow();
+                    // gameWin.Show();
+                    this.Close();
+                }
+                else
+                {
+                    _pollingTimer.Start();
                 }
                 if (response.Status == 5)
                 {
@@ -145,12 +150,21 @@ namespace TriviaClient.Views
         {
             try
             {
+                _pollingTimer.Stop();
+
                 Communicator.Instance.SendRequest((byte)RoomCommand.StartGame, Serializer.Serialize(new StartGameRequest()));
-                Communicator.Instance.ReceiveResponse(); // Await confirmation response
+                Communicator.Instance.ReceiveResponse();
+
+                MessageBox.Show("המשחק מתחיל!", "Game Starting", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                // GameWindow gameWin = new GameWindow();
+                // gameWin.Show();
+                this.Close();
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Error starting game: {ex.Message}");
+                _pollingTimer.Start(); 
             }
         }
     }
