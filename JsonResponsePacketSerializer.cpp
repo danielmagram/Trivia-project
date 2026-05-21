@@ -159,3 +159,46 @@ std::vector<unsigned char> JsonResponsePacketSerializer::serializeResponse(const
     j["status"] = response.status;
     return buildPacket(static_cast<unsigned char>(RequestCode::LEAVE_ROOM), j);
 }
+
+std::vector<unsigned char> JsonResponsePacketSerializer::serializeResponse(const LeaveGameResponse& response)
+{
+    json j;
+    j["status"] = response.status;
+    return buildPacket(static_cast<unsigned char>(RequestCode::LEAVE_GAME), j);
+}
+
+std::vector<unsigned char> JsonResponsePacketSerializer::serializeResponse(const GetQuestionResponse& response)
+{
+    json j;
+    j["status"] = response.status;
+    j["question"] = response.question;
+    j["answers"] = response.answers;
+    return buildPacket(static_cast<unsigned char>(RequestCode::GET_QUESTION), j);
+}
+
+std::vector<unsigned char> JsonResponsePacketSerializer::serializeResponse(const SubmitAnswerResponse& response)
+{
+    json j;
+    j["status"] = response.status;
+    j["correctAnswerId"] = response.correctAnswerId;
+    return buildPacket(static_cast<unsigned char>(RequestCode::SUBMIT_ANSWER), j);
+}
+
+std::vector<unsigned char> JsonResponsePacketSerializer::serializeResponse(const GetGameResultsResponse& response)
+{
+    json j;
+    j["status"] = response.status;
+
+    json resultsArray = json::array();
+    for (const auto& player : response.results) {
+        json playerJson;
+        playerJson["username"] = player.username;
+        playerJson["correctAnswerCount"] = player.correctAnswerCount;
+        playerJson["wrongAnswerCount"] = player.wrongAnswerCount;
+        playerJson["averageAnswerTime"] = player.averageAnswerTime;
+        resultsArray.push_back(playerJson);
+    }
+    j["results"] = resultsArray;
+
+    return buildPacket(static_cast<unsigned char>(RequestCode::GET_GAME_RESULTS), j);
+}
