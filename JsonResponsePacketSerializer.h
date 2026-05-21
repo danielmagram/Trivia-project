@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <vector>
+#include <map>
 #include <sstream>
 #include "Room.h"
 
@@ -72,6 +73,33 @@ struct LeaveRoomResponse
     unsigned int status;
 };
 
+struct LeaveGameResponse {
+    unsigned int status;
+};
+
+struct GetQuestionResponse {
+    unsigned int status;
+    std::string question;
+    std::map<unsigned int, std::string> answers;
+};
+
+struct SubmitAnswerResponse {
+    unsigned int status;
+    unsigned int correctAnswerId;
+};
+
+struct GetGameResultsResponse {
+    unsigned int status;
+    std::vector<PlayerResults> results;
+};
+
+struct PlayerResults {
+    std::string username;
+    unsigned int correctAnswerCount;
+    unsigned int wrongAnswerCount;
+    unsigned int averageAnswerTime;
+};
+
 class JsonResponsePacketSerializer
 {
 public:
@@ -90,5 +118,9 @@ public:
 	static std::vector<unsigned char> serializeResponse(const StartGameResponse& response);
 	static std::vector<unsigned char> serializeResponse(const GetRoomStateResponse& response);
 	static std::vector<unsigned char> serializeResponse(const LeaveRoomResponse& response);
+    static std::vector<unsigned char> serializeResponse(const LeaveGameResponse& response);
+    static std::vector<unsigned char> serializeResponse(const GetQuestionResponse& response);
+    static std::vector<unsigned char> serializeResponse(const SubmitAnswerResponse& response);
+    static std::vector<unsigned char> serializeResponse(const GetGameResultsResponse& response);
 
 };
