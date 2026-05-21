@@ -54,7 +54,7 @@ namespace TriviaClient.Models
     public class JoinRoomRequest
     {
         [JsonProperty("roomId")]
-        public uint RoomId { get; set; }
+        public uint roomId { get; set; }
     }
 
     public class CreateRoomRequest
@@ -150,32 +150,58 @@ namespace TriviaClient.Models
         [JsonProperty("UserStatistics")]
         public List<string> Statistics { get; set; }
     }
+    public class GetRoomsRequest { }
+
+
+    public class GetRoomStateRequest
+    {
+    }
+
+    public class GetRoomStateResponse
+    {
+        [JsonProperty("status")]
+        public uint Status { get; set; }
+
+        [JsonProperty("hasGameBegun")]
+        public bool HasGameBegun { get; set; }
+
+        [JsonProperty("players")]
+        public List<string> Players { get; set; }
+
+        [JsonProperty("questionCount")]
+        public uint QuestionCount { get; set; }
+
+        [JsonProperty("answerTimeout")]
+        public float AnswerTimeout { get; set; }
+    }
+
+    public class CloseRoomRequest
+    {
+    }
+    public class CloseRoomResponse
+    {
+        [JsonProperty("status")]
+        public uint Status { get; set; }
+    }
+    public class StartGameRequest
+    {
+    }
+
+    public class StartGameResponse
+    {
+        [JsonProperty("status")]
+        public uint Status { get; set; }
+    }
+
+    public class LeaveRoomRequest
+    {
+    }
+
+    public class LeaveRoomResponse
+    {
+        [JsonProperty("status")]
+        public uint Status { get; set; }
+    }
 
 }
-public class RoomData
-{
-    public int Id { get; set; }
-    public string Name { get; set; }
-    public int MaxPlayers { get; set; }
-    public int NumOfPlayers { get; set; }
-    public int TimePerQuestion { get; set; }
-    public int IsActive { get; set; }
-}
 
-public class GetRoomsRequest { }
-
-public class GetRoomsResponse
-{
-    public int Status { get; set; }
-    public List<RoomData> Rooms { get; set; }
-}
-
-public class JoinRoomRequest
-{
-    public int roomId { get; set; }
-}
-
-public class JoinRoomResponse
-{
-    public int Status { get; set; }
-}

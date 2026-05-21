@@ -1,65 +1,170 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
+using System.Windows.Threading;
 using TriviaClient.Networking;
 using TriviaClient.Models;
 using TriviaClient.State;
 
 namespace TriviaClient.Views
 {
-    /// <summary>
-    /// Interaction logic for RoomLobbyWindow.xaml
-    /// </summary>
+    public enum RoomCommand
+    {
+        CloseRoom = 151,
+        StartGame = 152,
+        GetRoomState = 153,
+        LeaveRoom = 154,
+        RoomClosedByAdmin = 155
+    }
+
     public partial class RoomLobbyWindow : Window
     {
+        private DispatcherTimer _pollingTimer;
+
         public RoomLobbyWindow()
         {
             InitializeComponent();
-            UpdateRoom( (uint)SessionData.RoomId);
+            UsernameText.Text = SessionData.Username;
+
+            _pollingTimer = new DispatcherTimer();
+            _pollingTimer.Interval = TimeSpan.FromSeconds(1.5);
+            _pollingTimer.Tick += (s, e) => PollRoomState();
+
+            if (SessionData.IsAdmin)
+            {
+                BtnStartGame.Visibility = Visibility.Visible;
+                BtnCloseRoom.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                BtnLeaveRoom.Visibility = Visibility.Visible;
+            }
+
+            PollRoomState();
+
+            _pollingTimer.Start();
         }
-        private void UpdateRoom(uint roomId)
+
+        private void PollRoomState()
         {
+            _pollingTimer.Stop(); 
             try
             {
-                Communicator.Instance.SendRequest(105, Serializer.Serialize(new GetPlayersInRoomRequest { roomId = roomId }));
-
+                Communicator.Instance.SendRequest((byte)RoomCommand.GetRoomState, Serializer.Serialize(new GetRoomStateRequest()));
                 ResponseInfo info = Communicator.Instance.ReceiveResponse();
-                var response = Serializer.Deserialize<GetPlayersInRoomResponse>(info.JsonPayload);
+                var response = Serializer.Deserialize<GetRoomStateResponse>(info.JsonPayload);
 
-                if(response.Players.Count != 0)
+                if (response.Status == 5)
                 {
-                    ListPlayers.ItemsSource = response.Players;
+                    HandleRoomClosedByAdmin("room not found");
+                    return;
                 }
 
-                
+                if (response.HasGameBegun)
+                {
+                    MessageBox.Show("The game is starting!", "Game Start", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                    MenuWindow menu = new MenuWindow(); // note: later will change to GameWindow
+                    menu.Show();
+                    this.Close();
+                    return;
+                }
+
+                if (response.Players.Count == 0)
+                {
+                    HandleRoomClosedByAdmin("admin closed the room");
+
+                    try
+                    {
+                        Communicator.Instance.SendRequest((byte)RoomCommand.RoomClosedByAdmin, Serializer.Serialize(new LeaveRoomRequest()));
+                        Communicator.Instance.ReceiveResponse();
+                    }
+                    catch { /* Safe to ignore network failure on cleanup */ }
+
+                    return;
+                }
+
+                ListPlayers.ItemsSource = response.Players;
+                _pollingTimer.Start();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                MessageBox.Show($"Failed to fetch players in room: {ex.Message}", "Network Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                HandleRoomClosedByAdmin("Lost connection to the room server.");
             }
         }
-        private void UpdateButton_Click(object sender, RoutedEventArgs e)
+
+        private void HandleRoomClosedByAdmin(string message)
         {
-            UpdateRoom((uint)SessionData.RoomId);
-            MessageBox.Show("Player list updated!");
+            _pollingTimer.Stop();
+            MessageBox.Show(message, "Room Closed", MessageBoxButton.OK, MessageBoxImage.Warning);
+            Communicator.Instance.SendRequest((byte)RoomCommand.RoomClosedByAdmin, Serializer.Serialize(new LeaveRoomRequest()));
+            Communicator.Instance.ReceiveResponse();
+
+
+            MenuWindow menu = new MenuWindow();
+            menu.Show();
+            this.Close();
         }
 
         private void LeaveButton_Click(object sender, RoutedEventArgs e)
         {
-            JoinRoomWindow window = new JoinRoomWindow();
-            window.Show();
+            try
+            {
+                _pollingTimer.Stop();
 
-            this.Close();
+                Communicator.Instance.SendRequest((byte)RoomCommand.LeaveRoom, Serializer.Serialize(new LeaveRoomRequest()));
+                Communicator.Instance.ReceiveResponse(); // Await confirmation response
+
+                MenuWindow window = new MenuWindow(); 
+                window.Show();
+                this.Close();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error leaving room: {ex.Message}");
+                _pollingTimer.Start();
+            }
+        }
+
+        private void CloseRoomButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                _pollingTimer.Stop();
+
+                Communicator.Instance.SendRequest((byte)RoomCommand.CloseRoom, Serializer.Serialize(new CloseRoomRequest()));
+                Communicator.Instance.ReceiveResponse();
+
+                MenuWindow window = new MenuWindow();// note: later will change to GameWindow
+                window.Show();
+                this.Close();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error closing room: {ex.Message}");
+                _pollingTimer.Start();
+            }
+        }
+
+        private void StartGameButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                _pollingTimer.Stop();
+
+                Communicator.Instance.SendRequest((byte)RoomCommand.StartGame, Serializer.Serialize(new StartGameRequest()));
+                Communicator.Instance.ReceiveResponse(); 
+
+                MessageBox.Show("Game starting! (Returning to Menu phase)", "Game Starting", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                MenuWindow menu = new MenuWindow();
+                menu.Show();
+                this.Close();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error starting game: {ex.Message}");
+                _pollingTimer.Start();
+            }
         }
     }
 }

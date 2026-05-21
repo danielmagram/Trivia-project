@@ -147,6 +147,7 @@ RequestResult MenuRequestHandler::joinRoom(const RequestInfo& info)
 		if (countPlayers < maxPlayers) {
 			room->addUser(m_user);
 			response.status = static_cast<unsigned int>(Status::SUCCESS);
+			result.newHandler = m_handlerFactory.createRoomMemberRequestHandler(m_user, room);
 		}
 		else {
             response.status = static_cast<unsigned int>(Status::ROOM_FULL);
@@ -177,7 +178,7 @@ RequestResult MenuRequestHandler::createRoom(const RequestInfo& info)
     data.maxPlayers = request.maxUsers;
     data.numOfQuestionsInGame = request.questionCount;
     data.timePerQuestion = request.answerTimeout;
-    data.status = 1;
+	data.status = 0; // 0 - waiting for players, 1 - active
     m_handlerFactory.getRoomManager().createRoom(m_user, data);
 
     
@@ -185,5 +186,6 @@ RequestResult MenuRequestHandler::createRoom(const RequestInfo& info)
     response.status = static_cast<unsigned int>(Status::SUCCESS);
 
     result.response = JsonResponsePacketSerializer::serializeResponse(response);
+	result.newHandler = m_handlerFactory.createRoomAdminRequestHandler(m_user, m_handlerFactory.getRoomManager().getRoomById(data.id));
     return result;
 }
