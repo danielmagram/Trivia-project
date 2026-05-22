@@ -63,8 +63,8 @@ namespace TriviaClient.Views
                 {
                     MessageBox.Show("The game is starting!", "Game Start", MessageBoxButton.OK, MessageBoxImage.Information);
 
-                    MenuWindow menu = new MenuWindow(); // note: later will change to GameWindow
-                    menu.Show();
+                    GameWindow gameWindow = new GameWindow();
+                    gameWindow.Show();
                     this.Close();
                     return;
                 }
@@ -134,7 +134,7 @@ namespace TriviaClient.Views
                 Communicator.Instance.SendRequest((byte)RoomCommand.CloseRoom, Serializer.Serialize(new CloseRoomRequest()));
                 Communicator.Instance.ReceiveResponse();
 
-                MenuWindow window = new MenuWindow();// note: later will change to GameWindow
+                MenuWindow window = new MenuWindow();
                 window.Show();
                 this.Close();
             }
@@ -156,8 +156,8 @@ namespace TriviaClient.Views
 
                 MessageBox.Show("Game starting! (Returning to Menu phase)", "Game Starting", MessageBoxButton.OK, MessageBoxImage.Information);
 
-                MenuWindow menu = new MenuWindow();
-                menu.Show();
+                GameWindow gameWindow = new GameWindow();
+                gameWindow.Show();
                 this.Close();
             }
             catch (Exception ex)
