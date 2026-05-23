@@ -5,6 +5,12 @@
     <Compile Update="Views\CreateRoomWindow.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Views\GameResultsWindow.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Views\GameWindow.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="Views\HighscoresWindow.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
