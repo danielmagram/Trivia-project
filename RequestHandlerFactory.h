@@ -1,6 +1,7 @@
 #pragma once
 #include "StatisticsManager.h" 
 #include "RoomManager.h" 
+#include "GameManager.h" 
 #include "LoginManager.h" 
 #include "IDatabase.h"   
 #include "IRequestHandler.h" 
@@ -29,4 +30,5 @@ private:
     LoginManager m_loginManager;
     RoomManager m_roomManager;
     StatisticsManager m_statisticsManager;
+    GameManager m_GameManager;
 };

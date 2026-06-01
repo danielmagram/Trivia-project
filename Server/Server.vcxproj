@@ -146,6 +146,7 @@
     <ClInclude Include="..\sqlite3.h" />
     <ClInclude Include="..\SqliteDatabase.h" />
     <ClInclude Include="..\StatisticsManager.h" />
+    <ClInclude Include="Game.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Communicator.cpp" />
@@ -167,6 +168,7 @@
     <ClCompile Include="..\sqlite3.c" />
     <ClCompile Include="..\SqliteDatabase.cpp" />
     <ClCompile Include="..\StatisticsManager.cpp" />
+    <ClCompile Include="Game.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

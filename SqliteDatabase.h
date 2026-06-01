@@ -23,6 +23,7 @@ public:
 	virtual int getNumOfPlayerGames(const std::string& username) override;
 	virtual float getPlayerScore(const std::string& username) override;
 	virtual std::vector<std::string> getHighScores() override;
+    virtual bool submitGameStatistics(std::string username, GameData stats) override;
 private:
     sqlite3* m_db;
     sqlite3_stmt* prepareStatement(const std::string& sql) const;
