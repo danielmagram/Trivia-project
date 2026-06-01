@@ -23,42 +23,45 @@ std::map<LoggedUser, GameData, UserCompare> Game::getPlayers() const
 
 Question Game::getQuestionForUser(LoggedUser user)
 {
-	auto it = m_players.find(user);
-	if (it != m_players.end())
-	{
-		GameData& info = it->second;
-		return m_questions[info.currentQuestion];
-	}
+	m_questionStartTimes[user] = std::chrono::steady_clock::now();
+	return m_questions[m_players[user].currentQuestion];
 }
 
-bool Game::submitAnswer(std::string answer, LoggedUser user)
+bool Game::submitAnswer(std::string answer, LoggedUser user) 
 {
-	static auto lastCallTime = std::chrono::steady_clock::now();
-	auto it = m_players.find(user);
-	if (it != m_players.end())
-	{
-		auto currentCallTime = std::chrono::steady_clock::now();
-		auto diff = currentCallTime - lastCallTime;
-		auto ms_duration = std::chrono::duration_cast<std::chrono::milliseconds>(diff);
-		unsigned int timePassed = static_cast<unsigned int>(ms_duration.count());
-		lastCallTime = currentCallTime;
-		GameData& info = it->second;
-		info.currentQuestion;
-		if (answer == m_questions[info.currentQuestion].getCorrectAnswer())
-		{
-			info.currentQuestion += 1;
-			info.correctAnswerCount += 1;
-			return true;
-		}
-		info.currentQuestion += 1;
-		info.totalAnswerCount += 1;
-		return false;
-	}
-	return false;
-	
+    auto endTime = std::chrono::steady_clock::now();
+    auto startTime = m_questionStartTimes[user];
+    auto duration = std::chrono::duration_cast<std::chrono::seconds>(endTime - startTime).count();
+
+    GameData& data = m_players[user];
+
+    data.avrageAnswerTime += static_cast<unsigned int>(duration);
+    data.totalAnswerCount++;
+
+    if (answer == m_questions[data.currentQuestion].getCorrectAnswer()) {
+        data.correctAnswerCount++;
+    }
+
+    if (data.currentQuestion == 9) {
+        data.avrageAnswerTime /= 10;
+    }
+
+    data.currentQuestion++;
+    return true;
 }
 
-void Game::removePlayer()
+void Game::removePlayer(LoggedUser user)
 {
+    if (m_players.find(user) == m_players.end()) {
+        return;
+    }
 
+    GameData& data = m_players[user];
+
+    if (data.currentQuestion > 0) {
+        data.avrageAnswerTime /= data.currentQuestion;
+    }
+
+    data.currentQuestion = 10;
+    m_questionStartTimes.erase(user);
 }

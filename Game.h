@@ -22,6 +22,7 @@ class Game {
 private:
     std::vector<Question> m_questions;
     std::map<LoggedUser, GameData, UserCompare> m_players;
+    std::map<LoggedUser, std::chrono::steady_clock::time_point, UserCompare> m_questionStartTimes;
     int m_gameId;    
 public:
     Game(std::vector<Question> questions, std::vector<LoggedUser> users, int gameId);
