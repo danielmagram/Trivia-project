@@ -41,3 +41,16 @@ void GameManager::submitGameStatsToDB(LoggedUser user, GameData data)
 {
     m_database->submitGameStatistics(user.getUsername(), data);
 }
+
+// helper function to find the game id of a user, returns -1 if the user is not in any game
+int GameManager::getGameIdByUsername(const std::string& username) {
+    for (const auto& game : m_games) {
+        auto players = game.getPlayers();
+        for (const auto& pair : players) {
+            if (pair.first.getUsername() == username) {
+                return game.getId();
+            }
+        }
+    }
+    return -1; 
+}

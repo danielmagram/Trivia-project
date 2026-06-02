@@ -10,7 +10,6 @@ RequestResult RoomRequestHandler::getRoomState(const RequestInfo& info) const
 {
     RequestResult result;
     GetRoomStateResponse response;
-
     Room* room = m_handlerFactory.getRoomManager().getRoomById(m_room->getMetadata().id);
     if (room == nullptr) {
         response.status = static_cast<unsigned int>(Status::ROOM_NOT_FOUND);
@@ -18,13 +17,22 @@ RequestResult RoomRequestHandler::getRoomState(const RequestInfo& info) const
         return result;
     }
 
+    bool gameHasBegun = (room->getMetadata().status == 1);
+
     response.status = static_cast<unsigned int>(Status::SUCCESS);
-    response.hasGameBegun = room->getMetadata().status == 1; // 1 - mean active, 0 - waiting for players
+    response.hasGameBegun = gameHasBegun;
     response.players = room->getAllUsers();
     response.questionCount = room->getMetadata().numOfQuestionsInGame;
     response.answerTimeout = static_cast<float>(room->getMetadata().timePerQuestion);
 
     result.response = JsonResponsePacketSerializer::serializeResponse(response);
-    result.newHandler = nullptr;
+
+    if (gameHasBegun) {
+        int gameId = m_handlerFactory.getGameManager().getGameIdByUsername(m_user.getUsername());
+        if (gameId != -1) {
+            result.newHandler = m_handlerFactory.createGameRequestHandler(m_user, gameId);
+        }
+    }
+
     return result;
 }

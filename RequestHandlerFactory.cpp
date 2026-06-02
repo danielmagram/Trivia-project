@@ -52,3 +52,14 @@ StatisticsManager& RequestHandlerFactory::getStatisticsManager()
 {
     return m_statisticsManager;
 }
+
+GameManager& RequestHandlerFactory::getGameManager()
+{
+    return m_GameManager;
+}
+
+std::unique_ptr<IRequestHandler> RequestHandlerFactory::createGameRequestHandler(LoggedUser loggedUser, int gameId)
+{
+    // This will return your GameRequestHandler once you write its skeleton class
+    return std::make_unique<GameRequestHandler>(*this, loggedUser, gameId);
+}

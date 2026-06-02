@@ -18,4 +18,5 @@ public:
     Game createGame(Room room);
     void deleteGame(int gameId);
     void submitGameStatsToDB(LoggedUser user, GameData data);
+    int getGameIdByUsername(const std::string& username);
 };
