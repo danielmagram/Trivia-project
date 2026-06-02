@@ -54,3 +54,13 @@ int GameManager::getGameIdByUsername(const std::string& username) {
     }
     return -1; 
 }
+
+Game& GameManager::getGameById(int gameId)
+{
+    for (auto& game : m_games) {
+        if (game.getId() == gameId) {
+            return game;
+        }
+	}
+	throw std::runtime_error("Game not found");
+}

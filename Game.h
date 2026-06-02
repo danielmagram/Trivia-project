@@ -29,6 +29,7 @@ public:
     Game(std::vector<Question> questions, std::vector<LoggedUser> users, int gameId);
     ~Game();
     Question getQuestionForUser(LoggedUser user);
+    Question getCurrentQuestion(LoggedUser user);
     bool submitAnswer(std::string answer, LoggedUser user);
     void removePlayer(LoggedUser user);
     int getId() const;

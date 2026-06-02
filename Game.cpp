@@ -27,6 +27,11 @@ Question Game::getQuestionForUser(LoggedUser user)
 	return m_questions[m_players[user].currentQuestion];
 }
 
+Question Game::getCurrentQuestion(LoggedUser user)
+{
+    return m_questions[m_players[user].currentQuestion];
+}
+
 bool Game::submitAnswer(std::string answer, LoggedUser user) 
 {
     auto endTime = std::chrono::steady_clock::now();

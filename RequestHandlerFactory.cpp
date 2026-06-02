@@ -4,6 +4,7 @@
 #include "RoomAdminRequestHandler.h"
 #include "RoomMemberRequestHandler.h"
 #include "SqliteDatabase.h"
+#include "GameRequestHandler.h"
 
 RequestHandlerFactory::RequestHandlerFactory()
 	: m_database(new SqliteDatabase()), m_loginManager(m_database), m_statisticsManager(m_database), m_GameManager(m_database)
@@ -60,6 +61,5 @@ GameManager& RequestHandlerFactory::getGameManager()
 
 std::unique_ptr<IRequestHandler> RequestHandlerFactory::createGameRequestHandler(LoggedUser loggedUser, int gameId)
 {
-    // This will return your GameRequestHandler once you write its skeleton class
     return std::make_unique<GameRequestHandler>(*this, loggedUser, gameId);
 }
