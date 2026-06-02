@@ -300,3 +300,47 @@ std::vector<std::string> SqliteDatabase::getHighScores()
 
 	return topScores;
 }
+
+bool SqliteDatabase::submitGameStatistics(std::string username, GameData stats)
+{
+	const char* sql = R"(
+        INSERT INTO STATISTICS (USERNAME, GAMES_PLAYED, TOTAL_ANSWERS, CORRECT_ANSWERS, AVERAGE_ANSWER_TIME)
+        VALUES (?, 1, ?, ?, ?)
+        ON CONFLICT(USERNAME) DO UPDATE SET
+            GAMES_PLAYED = GAMES_PLAYED + 1,
+            AVERAGE_ANSWER_TIME = (
+                (AVERAGE_ANSWER_TIME * TOTAL_ANSWERS) + (? * ?)
+            ) / (TOTAL_ANSWERS + ?),
+            TOTAL_ANSWERS = TOTAL_ANSWERS + ?,
+            CORRECT_ANSWERS = CORRECT_ANSWERS + ?;
+    )";
+
+	sqlite3_stmt* stmt = nullptr;
+	try {
+		stmt = prepareStatement(sql);
+
+		sqlite3_bind_text(stmt, 1, username.c_str(), -1, SQLITE_TRANSIENT);
+		sqlite3_bind_int(stmt, 2, stats.totalAnswerCount);
+		sqlite3_bind_int(stmt, 3, stats.correctAnswerCount);
+		sqlite3_bind_double(stmt, 4, static_cast<double>(stats.avrageAnswerTime));
+
+		sqlite3_bind_double(stmt, 5, static_cast<double>(stats.avrageAnswerTime));
+		sqlite3_bind_int(stmt, 6, stats.totalAnswerCount);
+		sqlite3_bind_int(stmt, 7, stats.totalAnswerCount);
+		sqlite3_bind_int(stmt, 8, stats.totalAnswerCount);
+		sqlite3_bind_int(stmt, 9, stats.correctAnswerCount);
+
+		if (sqlite3_step(stmt) != SQLITE_DONE) {
+			sqlite3_finalize(stmt);
+			return false;
+		}
+
+		sqlite3_finalize(stmt);
+		return true;
+	}
+	catch (const std::runtime_error& e) {
+		std::cerr << e.what() << std::endl;
+		if (stmt) sqlite3_finalize(stmt);
+		return false;
+	}
+}

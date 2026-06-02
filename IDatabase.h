@@ -4,7 +4,7 @@
 #include <io.h>
 #include <string>
 #include <list>
-#include "Question.h"
+#include "GameManager.h"
 
 class IDatabase
 {
@@ -23,4 +23,5 @@ public:
     virtual int getNumOfPlayerGames(const std::string& username) = 0;
     virtual float getPlayerScore(const std::string& username) = 0;
     virtual std::vector<std::string> getHighScores() = 0;
+    virtual bool submitGameStatistics(std::string username, GameData stats) = 0;
 };

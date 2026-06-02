@@ -1,0 +1,67 @@
+#include "Game.h"
+#include <chrono>
+
+Game::Game(std::vector<Question> questions, std::vector<LoggedUser> users, int gameId)
+	: m_questions(std::move(questions)), m_gameId(gameId) {
+	for (const auto& user : users) {
+		m_players[user] = GameData();
+	}
+}
+
+Game::~Game() {
+}
+
+int Game::getId() const
+{
+	return m_gameId;
+}
+std::map<LoggedUser, GameData, UserCompare> Game::getPlayers() const
+{
+	return m_players;
+}
+
+
+Question Game::getQuestionForUser(LoggedUser user)
+{
+	m_questionStartTimes[user] = std::chrono::steady_clock::now();
+	return m_questions[m_players[user].currentQuestion];
+}
+
+bool Game::submitAnswer(std::string answer, LoggedUser user) 
+{
+    auto endTime = std::chrono::steady_clock::now();
+    auto startTime = m_questionStartTimes[user];
+    auto duration = std::chrono::duration_cast<std::chrono::seconds>(endTime - startTime).count();
+
+    GameData& data = m_players[user];
+
+    data.avrageAnswerTime += static_cast<unsigned int>(duration);
+    data.totalAnswerCount++;
+
+    if (answer == m_questions[data.currentQuestion].getCorrectAnswer()) {
+        data.correctAnswerCount++;
+    }
+
+    if (data.currentQuestion == 9) {
+        data.avrageAnswerTime /= 10;
+    }
+
+    data.currentQuestion++;
+    return true;
+}
+
+void Game::removePlayer(LoggedUser user)
+{
+    if (m_players.find(user) == m_players.end()) {
+        return;
+    }
+
+    GameData& data = m_players[user];
+
+    if (data.currentQuestion > 0) {
+        data.avrageAnswerTime /= data.currentQuestion;
+    }
+
+    data.currentQuestion = 10;
+    m_questionStartTimes.erase(user);
+}
