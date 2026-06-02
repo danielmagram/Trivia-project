@@ -6,7 +6,7 @@
 #include "SqliteDatabase.h"
 
 RequestHandlerFactory::RequestHandlerFactory()
-    : m_database(new SqliteDatabase()), m_loginManager(m_database), m_statisticsManager(m_database)
+	: m_database(new SqliteDatabase()), m_loginManager(m_database), m_statisticsManager(m_database), m_GameManager(m_database)
 {
 }
 

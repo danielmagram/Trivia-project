@@ -4,6 +4,8 @@
 #include "Room.h"
 #include "IDatabase.h"
 
+class IDatabase;
+
 class GameManager {
 private:
     IDatabase* m_database;
