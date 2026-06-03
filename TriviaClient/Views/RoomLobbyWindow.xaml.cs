@@ -52,6 +52,8 @@ namespace TriviaClient.Views
                 Communicator.Instance.SendRequest((byte)RoomCommand.GetRoomState, Serializer.Serialize(new GetRoomStateRequest()));
                 ResponseInfo info = Communicator.Instance.ReceiveResponse();
                 var response = Serializer.Deserialize<GetRoomStateResponse>(info.JsonPayload);
+                SessionData.QuestionCount = (int)response.QuestionCount;
+                SessionData.AnswerTimeout = (int)response.AnswerTimeout;
 
                 if (response.Status == 5)
                 {
@@ -62,7 +64,7 @@ namespace TriviaClient.Views
                 if (response.HasGameBegun)
                 {
                     MessageBox.Show("The game is starting!", "Game Start", MessageBoxButton.OK, MessageBoxImage.Information);
-
+                 
                     GameWindow gameWindow = new GameWindow();
                     gameWindow.Show();
                     this.Close();
@@ -154,8 +156,8 @@ namespace TriviaClient.Views
                 Communicator.Instance.SendRequest((byte)RoomCommand.StartGame, Serializer.Serialize(new StartGameRequest()));
                 Communicator.Instance.ReceiveResponse(); 
 
-                MessageBox.Show("Game starting! (Returning to Menu phase)", "Game Starting", MessageBoxButton.OK, MessageBoxImage.Information);
 
+                MessageBox.Show("Game starting!", "Game Starting", MessageBoxButton.OK, MessageBoxImage.Information);
                 GameWindow gameWindow = new GameWindow();
                 gameWindow.Show();
                 this.Close();

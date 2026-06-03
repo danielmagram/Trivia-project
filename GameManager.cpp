@@ -1,7 +1,6 @@
 #include "GameManager.h"
 #include "IDatabase.h"
 #include <algorithm> 
-#define QUESTION_AMOUNT 10
 
 GameManager::GameManager(IDatabase* db) : m_database(db), m_nextGameId(0)
 {
@@ -13,7 +12,8 @@ GameManager::~GameManager()
 
 Game GameManager::createGame(Room room)
 {
-    std::list<Question> questionList = m_database->getQuestions(QUESTION_AMOUNT);
+    unsigned int dynamicQuestionCount = room.getMetadata().numOfQuestionsInGame;
+    std::list<Question> questionList = m_database->getQuestions(dynamicQuestionCount);
 
     std::vector<Question> questionVector(questionList.begin(), questionList.end());
 
@@ -63,4 +63,15 @@ Game& GameManager::getGameById(int gameId)
         }
 	}
 	throw std::runtime_error("Game not found");
+}
+
+void GameManager::removePlayer(int gameId, LoggedUser user)
+{
+	Game& game = getGameById(gameId);
+	GameData data = game.getPlayers().at(user);
+	submitGameStatsToDB(user, data);
+	game.removePlayer(user);
+    if (game.getPlayers().empty() && game.isGameFinished()) {
+        deleteGame(gameId);
+	}
 }

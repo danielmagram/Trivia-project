@@ -23,13 +23,35 @@ std::map<LoggedUser, GameData, UserCompare> Game::getPlayers() const
 
 Question Game::getQuestionForUser(LoggedUser user)
 {
+    GameData& playerData = m_players[user];
 	m_questionStartTimes[user] = std::chrono::steady_clock::now();
-	return m_questions[m_players[user].currentQuestion];
+    if (playerData.currentQuestion >= m_questions.size())
+    {
+        
+        throw std::runtime_error("Player has finished all questions");
+    }
+	return m_questions[playerData.currentQuestion];
 }
 
 Question Game::getCurrentQuestion(LoggedUser user)
 {
     return m_questions[m_players[user].currentQuestion];
+}
+
+bool Game::isGameFinished() const
+{
+        for (const auto& pair : m_players)
+        {
+            const GameData& playerData = pair.second;
+
+            if (playerData.currentQuestion < m_questions.size())
+            {
+                return false;
+            }
+        }
+
+        return true;
+    
 }
 
 bool Game::submitAnswer(std::string answer, LoggedUser user) 

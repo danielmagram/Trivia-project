@@ -3,29 +3,38 @@ using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
-using TriviaClient.Networking;
 using TriviaClient.Models;
+using TriviaClient.Networking;
+using TriviaClient.State;
 
 namespace TriviaClient.Views
 {
+    public enum GameCommand
+    {
+        LeaveGame = 160,
+        GetQuestion = 161,
+        SubmitAnswer = 162,
+        GetGameResults = 163
+    }
+
     public partial class GameWindow : Window
     {
         private DispatcherTimer _questionTimer;
         private int _timeLeft;
         private int _correctAnswersCount = 0;
-        private int _questionsRemaining = 5; // will be set based on server response when loading the first question
+        private int _questionsRemaining = SessionData.QuestionCount;
+        private DispatcherTimer _resultsPollingTimer;
 
-        // will help us map each answer button to its corresponding answer ID (0-3)
         private Dictionary<Button, int> _answerButtonMap;
 
         public GameWindow()
         {
             InitializeComponent();
-            InitTimer();
-            InitButtonMap();
+            InitTimer(); 
 
-            // Loading the first question (currently using Mock, will replace with server call when partner finishes)
-            LoadMockQuestion();
+            _answerButtonMap = new Dictionary<Button, int>();
+
+            LoadNextQuestion();
         }
 
         private void InitTimer()
@@ -33,17 +42,6 @@ namespace TriviaClient.Views
             _questionTimer = new DispatcherTimer();
             _questionTimer.Interval = TimeSpan.FromSeconds(1);
             _questionTimer.Tick += Timer_Tick;
-        }
-
-        private void InitButtonMap()
-        {
-            _answerButtonMap = new Dictionary<Button, int>
-            {
-                { BtnAnswer0, 0 },
-                { BtnAnswer1, 1 },
-                { BtnAnswer2, 2 },
-                { BtnAnswer3, 3 }
-            };
         }
 
         private void StartNewQuestionTimer(int seconds)
@@ -62,70 +60,156 @@ namespace TriviaClient.Views
             {
                 _questionTimer.Stop();
                 MessageBox.Show("Time's up for this question!", "Time's Up", MessageBoxButton.OK, MessageBoxImage.Warning);
-                HandleAnswerSubmission(4);
+                HandleAnswerSubmission(4); 
             }
         }
 
-        private void LoadMockQuestion()
+        private void LoadNextQuestion()
         {
-            // Update the counters on the screen
-            TxtQuestionsRemaining.Text = _questionsRemaining.ToString();
-            TxtCorrectAnswers.Text = _correctAnswersCount.ToString();
+            try
+            {
+                Communicator.Instance.SendRequest((byte)GameCommand.GetQuestion, Serializer.Serialize(new GetQuestionRequest()));
+                ResponseInfo info = Communicator.Instance.ReceiveResponse();
+                var response = Serializer.Deserialize<GetQuestionResponse>(info.JsonPayload);
 
-            // Temporary data for visual testing only
-            TxtQuestion.Text = "whats the capital of France?";
-            BtnAnswer0.Content = "London";
-            BtnAnswer1.Content = "Paris";
-            BtnAnswer2.Content = "Rome";
-            BtnAnswer3.Content = "Berlin";
+                if (response.Status != 1) 
+                {
+                    MessageBox.Show("Failed to load question from server.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
 
-            StartNewQuestionTimer(10); // Timer for 10 seconds as an example
+                TxtQuestionsRemaining.Text = _questionsRemaining.ToString();
+                TxtCorrectAnswers.Text = _correctAnswersCount.ToString();
+                TxtQuestion.Text = response.Question;
+
+                Button[] buttons = { BtnAnswer0, BtnAnswer1, BtnAnswer2, BtnAnswer3 };
+                _answerButtonMap.Clear();
+
+                int i = 0;
+                foreach (var answerArr in response.Answers)
+                {
+                    // Ensure the array has both the ID and the text string safely
+                    if (i < 4 && answerArr != null && answerArr.Length >= 2)
+                    {
+                        uint answerId = Convert.ToUInt32(answerArr[0]);
+                        string answerText = answerArr[1]?.ToString();
+
+                        buttons[i].Content = answerText;
+
+                        _answerButtonMap[buttons[i]] = (int)answerId;
+                        i++;
+                    }
+                }
+
+                StartNewQuestionTimer(SessionData.AnswerTimeout);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lost connection to server: {ex.Message}");
+            }
         }
 
         private void AnswerButton_Click(object sender, RoutedEventArgs e)
         {
             _questionTimer.Stop();
+
             Button clickedButton = sender as Button;
             int selectedAnswerId = _answerButtonMap[clickedButton];
 
-            // Local temporary check (if clicked on Paris - answer 1)
-            if (selectedAnswerId == 1)
-            {
-                _correctAnswersCount++;
-                MessageBox.Show("Correct answer!", "Well Done", MessageBoxButton.OK, MessageBoxImage.Information);
-            }
-            else
-            {
-                MessageBox.Show("Wrong answer!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-
-            _questionsRemaining--;
-
-            if (_questionsRemaining > 0)
-            {
-                LoadMockQuestion(); // Load the next question
-            }
-            else
-            {
-                // 
-                GameResultsWindow resultsWindow = new GameResultsWindow();
-                resultsWindow.Show();
-                this.Close();
-            }
+            HandleAnswerSubmission(selectedAnswerId);
         }
 
         private void HandleAnswerSubmission(int answerId)
         {
-            // will handle sending the answer to the server and processing the response when we integrate with the backend
-
-            _questionsRemaining--;
-            if (_questionsRemaining > 0) LoadMockQuestion();
-            else
+            try
             {
-                GameResultsWindow resultsWindow = new GameResultsWindow();
-                resultsWindow.Show();
-                this.Close();
+                var req = new SubmitAnswerRequest { AnswerId = (uint)answerId };
+                Communicator.Instance.SendRequest((byte)GameCommand.SubmitAnswer, Serializer.Serialize(req));
+                ResponseInfo info = Communicator.Instance.ReceiveResponse();
+                var response = Serializer.Deserialize<SubmitAnswerResponse>(info.JsonPayload);
+
+                if (response.CorrectAnswerId == answerId)
+                {
+                    _correctAnswersCount++;
+                    MessageBox.Show("Correct answer!", "Well Done", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                else
+                {
+                    MessageBox.Show("Wrong answer!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+
+                _questionsRemaining--;
+
+                if (_questionsRemaining > 0)
+                {
+                    LoadNextQuestion();
+                }
+                else
+                {
+                    EnterWaitingForPlayersState();
+                    GameResultsWindow resultsWindow = new GameResultsWindow();
+                    resultsWindow.Show();
+                    this.Close();
+                }
             }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error submitting answer: {ex.Message}");
+            }
+        }
+        private void EnterWaitingForPlayersState()
+        {
+            TxtQuestion.Text = "Waiting for other players to finish...";
+            BtnAnswer0.Visibility = Visibility.Collapsed;
+            BtnAnswer1.Visibility = Visibility.Collapsed;
+            BtnAnswer2.Visibility = Visibility.Collapsed;
+            BtnAnswer3.Visibility = Visibility.Collapsed;
+            TxtTimer.Text = "--";
+
+            _resultsPollingTimer = new DispatcherTimer();
+        _resultsPollingTimer.Interval = TimeSpan.FromSeconds(1.5);
+            _resultsPollingTimer.Tick += (s, e) => PollForGameEnd();
+        _resultsPollingTimer.Start();
+        }
+
+        private void PollForGameEnd()
+        {
+            try
+            {
+                _resultsPollingTimer.Stop(); 
+
+                Communicator.Instance.SendRequest((byte)GameCommand.GetGameResults, Serializer.Serialize(new GetGameResultsRequest()));
+                ResponseInfo info = Communicator.Instance.ReceiveResponse();
+                var response = Serializer.Deserialize<GetGameResultsResponse>(info.JsonPayload);
+
+ 
+                if (response.Status == 1)
+                {
+                    GameResultsWindow resultsWindow = new GameResultsWindow();
+                    resultsWindow.Show();
+                    this.Close();
+                }
+                else if (response.Status == 11)
+                {
+                    _resultsPollingTimer.Start();
+                }
+            }
+            catch (Exception)
+            {
+                _resultsPollingTimer.Start();
+            }
+        }
+        protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
+        {
+            try
+            {
+                _questionTimer?.Stop();
+                Communicator.Instance.SendRequest((byte)GameCommand.LeaveGame, Serializer.Serialize(new LeaveGameRequest()));
+                Communicator.Instance.ReceiveResponse();
+            }
+            catch { }
+
+            base.OnClosing(e);
         }
     }
 }
