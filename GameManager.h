@@ -4,6 +4,8 @@
 #include "Room.h"
 #include "IDatabase.h"
 
+class IDatabase;
+
 class GameManager {
 private:
     IDatabase* m_database;
@@ -16,4 +18,6 @@ public:
     Game createGame(Room room);
     void deleteGame(int gameId);
     void submitGameStatsToDB(LoggedUser user, GameData data);
+    int getGameIdByUsername(const std::string& username);
+	Game& getGameById(int gameId);
 };

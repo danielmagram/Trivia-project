@@ -1,7 +1,9 @@
 #include "GameManager.h"
+#include "IDatabase.h"
+#include <algorithm> 
 #define QUESTION_AMOUNT 10
 
-GameManager::GameManager(IDatabase* db) : m_database(db) , m_nextGameId(0)
+GameManager::GameManager(IDatabase* db) : m_database(db), m_nextGameId(0)
 {
 }
 
@@ -11,7 +13,11 @@ GameManager::~GameManager()
 
 Game GameManager::createGame(Room room)
 {
-    m_games.emplace_back(m_database->getQuestions(QUESTION_AMOUNT), room.getAllUsers(), m_nextGameId++);
+    std::list<Question> questionList = m_database->getQuestions(QUESTION_AMOUNT);
+
+    std::vector<Question> questionVector(questionList.begin(), questionList.end());
+
+    m_games.emplace_back(questionVector, room.getAllUsers(), m_nextGameId++);
     return m_games.back();
 }
 
@@ -30,7 +36,31 @@ void GameManager::deleteGame(int gameId) {
         m_games.erase(it);
     }
 }
+
 void GameManager::submitGameStatsToDB(LoggedUser user, GameData data)
 {
     m_database->submitGameStatistics(user.getUsername(), data);
+}
+
+// helper function to find the game id of a user, returns -1 if the user is not in any game
+int GameManager::getGameIdByUsername(const std::string& username) {
+    for (const auto& game : m_games) {
+        auto players = game.getPlayers();
+        for (const auto& pair : players) {
+            if (pair.first.getUsername() == username) {
+                return game.getId();
+            }
+        }
+    }
+    return -1; 
+}
+
+Game& GameManager::getGameById(int gameId)
+{
+    for (auto& game : m_games) {
+        if (game.getId() == gameId) {
+            return game;
+        }
+	}
+	throw std::runtime_error("Game not found");
 }

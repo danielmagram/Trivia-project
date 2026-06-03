@@ -4,6 +4,14 @@
 Question::Question(std::string question, std::vector<std::string> answers)
     : m_question(question), m_answers(answers)
 {
+    if (!m_answers.empty()) {
+        m_correctAnswer = m_answers[0];
+    }
+    else {
+        m_correctAnswer = "";
+    }
+
+    std::random_shuffle(m_answers.begin(), m_answers.end());
 }
 
 std::string Question::getQuestion() const
@@ -11,19 +19,12 @@ std::string Question::getQuestion() const
     return m_question;
 }
 
-
 std::vector<std::string> Question::getAnswers() const
 {
-	std::vector<std::string> shuffledAnswers = m_answers;
-	std::random_shuffle(shuffledAnswers.begin(), shuffledAnswers.end());
-    return shuffledAnswers;
+    return m_answers;
 }
 
 std::string Question::getCorrectAnswer() const
 {
-    if (!m_answers.empty())
-    {
-        return m_answers[0];
-    }
-    return ""; 
+    return m_correctAnswer;
 }

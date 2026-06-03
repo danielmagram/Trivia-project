@@ -9,6 +9,7 @@
 // Forward declarations to avoid circular dependencies
 class Room;
 class LoggedUser;
+class GameRequestHandler;
 
 class RequestHandlerFactory
 {
@@ -21,7 +22,9 @@ public:
     std::unique_ptr<IRequestHandler> createMenuRequestHandler(const std::string& user);
     std::unique_ptr<IRequestHandler> createRoomAdminRequestHandler(LoggedUser loggedUser, Room* room);
     std::unique_ptr<IRequestHandler> createRoomMemberRequestHandler(LoggedUser loggedUser, Room* room);
+    std::unique_ptr<IRequestHandler> createGameRequestHandler(LoggedUser loggedUser, int gameId);
 
+    GameManager& getGameManager();
     LoginManager& getLoginManager();
     RoomManager& getRoomManager();
     StatisticsManager& getStatisticsManager();

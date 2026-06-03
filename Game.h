@@ -2,14 +2,15 @@
 #include "Question.h"
 #include "LoggedUser.h"
 #include <map>
+#include <vector> 
+#include <chrono> 
 
 struct GameData
 {
-	unsigned int currentQuestion;
-	unsigned int correctAnswerCount;
-	unsigned int totalAnswerCount;
-	unsigned int avrageAnswerTime;
-
+    unsigned int currentQuestion;
+    unsigned int correctAnswerCount;
+    unsigned int totalAnswerCount;
+    unsigned int avrageAnswerTime;
 };
 
 struct UserCompare {
@@ -23,11 +24,12 @@ private:
     std::vector<Question> m_questions;
     std::map<LoggedUser, GameData, UserCompare> m_players;
     std::map<LoggedUser, std::chrono::steady_clock::time_point, UserCompare> m_questionStartTimes;
-    int m_gameId;    
+    int m_gameId;
 public:
     Game(std::vector<Question> questions, std::vector<LoggedUser> users, int gameId);
     ~Game();
     Question getQuestionForUser(LoggedUser user);
+    Question getCurrentQuestion(LoggedUser user);
     bool submitAnswer(std::string answer, LoggedUser user);
     void removePlayer(LoggedUser user);
     int getId() const;

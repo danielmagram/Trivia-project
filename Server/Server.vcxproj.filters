@@ -87,6 +87,9 @@
     <ClInclude Include="..\GameManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\GameRequestHandler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Server.cpp">
@@ -146,10 +149,13 @@
     <ClCompile Include="..\RoomRequestHandler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\‏‏Game.cpp">
+    <ClCompile Include="..\GameManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\GameManager.cpp">
+    <ClCompile Include="..\GameRequestHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Game.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
