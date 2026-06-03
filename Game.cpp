@@ -51,7 +51,6 @@ bool Game::isGameFinished() const
         }
 
         return true;
-    
 }
 
 bool Game::submitAnswer(std::string answer, LoggedUser user) 

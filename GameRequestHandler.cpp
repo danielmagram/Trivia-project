@@ -151,6 +151,7 @@ RequestResult GameRequestHandler::getGameResults(const RequestInfo& info)
     }
     else
     {
+		response.results = {};
         response.status = static_cast<unsigned int>(Status::GAME_NOT_FINISHED);
     }
     result.response = JsonResponsePacketSerializer::serializeResponse(response);
