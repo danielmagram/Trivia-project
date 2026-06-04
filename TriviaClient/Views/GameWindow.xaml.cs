@@ -147,9 +147,7 @@ namespace TriviaClient.Views
                 else
                 {
                     EnterWaitingForPlayersState();
-                    GameResultsWindow resultsWindow = new GameResultsWindow();
-                    resultsWindow.Show();
-                    this.Close();
+
                 }
             }
             catch (Exception ex)
