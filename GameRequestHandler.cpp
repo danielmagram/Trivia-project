@@ -124,56 +124,51 @@ RequestResult GameRequestHandler::getGameResults(const RequestInfo& info)
 {
     RequestResult result;
     GetGameResultsResponse response;
-
-    try
+    if (m_gameManager.getGameById(m_gameId).isGameFinished())
     {
-        Game& activeGame = m_gameManager.getGameById(m_gameId);
-        std::map<LoggedUser, GameData, UserCompare> players = activeGame.getPlayers();
-
-        for (const auto& pair : players)
+        try
         {
-            PlayerResults pResult;
-            pResult.username = pair.first.getUsername();
-            pResult.correctAnswerCount = pair.second.correctAnswerCount;
-            pResult.wrongAnswerCount = pair.second.totalAnswerCount - pair.second.correctAnswerCount;
-            pResult.averageAnswerTime = pair.second.avrageAnswerTime;
+            Game& activeGame = m_gameManager.getGameById(m_gameId);
+            std::map<LoggedUser, GameData, UserCompare> players = activeGame.getPlayers();
 
-            response.results.push_back(pResult);
+            for (const auto& pair : players)
+            {
+                PlayerResults pResult;
+                pResult.username = pair.first.getUsername();
+                pResult.correctAnswerCount = pair.second.correctAnswerCount;
+                pResult.wrongAnswerCount = pair.second.totalAnswerCount - pair.second.correctAnswerCount;
+                pResult.averageAnswerTime = pair.second.avrageAnswerTime;
+
+                response.results.push_back(pResult);
+            }
+
+            response.status = static_cast<unsigned int>(Status::SUCCESS);
         }
-
-        response.status = static_cast<unsigned int>(Status::SUCCESS);
+        catch (...)
+        {
+            response.status = static_cast<unsigned int>(Status::GENERIC_ERROR);
+        }
     }
-    catch (...)
+    else
     {
-        response.status = static_cast<unsigned int>(Status::GENERIC_ERROR);
+		response.results = {};
+        response.status = static_cast<unsigned int>(Status::GAME_NOT_FINISHED);
     }
-
     result.response = JsonResponsePacketSerializer::serializeResponse(response);
 
-    result.newHandler = m_handlerFactory.createMenuRequestHandler(m_user.getUsername());
+	result.newHandler = nullptr;
     return result;
 }
 
-RequestResult GameRequestHandler::leaveGame(const RequestInfo& info)
+RequestResult GameRequestHandler::leaveGame(const RequestInfo& reqInfo)
 {
+    m_gameManager.removePlayer(m_gameId, m_user);
+
     RequestResult result;
-    LeaveGameResponse response;
-
-    try
-    {
-        Game& activeGame = m_gameManager.getGameById(m_gameId);
-
-        activeGame.removePlayer(m_user);
-
-        response.status = static_cast<unsigned int>(Status::SUCCESS);
-    }
-    catch (...)
-    {
-        response.status = static_cast<unsigned int>(Status::GENERIC_ERROR);
-    }
-
+	LeaveGameResponse response;
+	response.status = static_cast<unsigned int>(Status::SUCCESS);
     result.response = JsonResponsePacketSerializer::serializeResponse(response);
-
     result.newHandler = m_handlerFactory.createMenuRequestHandler(m_user.getUsername());
+
     return result;
 }

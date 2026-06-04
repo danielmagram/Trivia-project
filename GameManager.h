@@ -20,4 +20,5 @@ public:
     void submitGameStatsToDB(LoggedUser user, GameData data);
     int getGameIdByUsername(const std::string& username);
 	Game& getGameById(int gameId);
+    void removePlayer(int gameId, LoggedUser user);
 };

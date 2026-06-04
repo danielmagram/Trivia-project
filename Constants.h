@@ -35,5 +35,6 @@ enum class Status : unsigned int {
 	EMPTY_VALUE = 7,
 	USER_EXISTS = 8,
 	USER_ALREADY_LOGGED_IN = 9,
-	QUESTION_NOT_FOUND = 10
+	QUESTION_NOT_FOUND = 10,
+    GAME_NOT_FINISHED = 11
 };

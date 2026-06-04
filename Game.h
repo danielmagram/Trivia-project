@@ -30,6 +30,7 @@ public:
     ~Game();
     Question getQuestionForUser(LoggedUser user);
     Question getCurrentQuestion(LoggedUser user);
+    bool isGameFinished() const;
     bool submitAnswer(std::string answer, LoggedUser user);
     void removePlayer(LoggedUser user);
     int getId() const;

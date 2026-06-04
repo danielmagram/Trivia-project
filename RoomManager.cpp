@@ -33,7 +33,9 @@ std::vector<RoomData> RoomManager::getRooms() const
 {
     std::vector<RoomData> roomDataList;
     for (const auto& room : m_rooms) {
-        roomDataList.push_back(room.getMetadata());
+        if (room.getMetadata().status == 0) 
+            roomDataList.push_back(room.getMetadata());
+        
     }
 	return roomDataList;
 }
