@@ -39,10 +39,10 @@ namespace TriviaClient.Views
                 if (response.Statistics != null && response.Statistics.Count >= 5)
                 {
                     GamesCountText.Text = $"number of games: {response.Statistics[0]}";
-                    RightAnswersText.Text = $"number of right answers: {response.Statistics[1]}";
-                    TotalAnswersText.Text = $"number of total answers: {response.Statistics[2]}";
-                    WrongAnswersText.Text = $"number of wrong answers: {response.Statistics[3]}";
-                    AvgTimeText.Text = $"average time for answer: {response.Statistics[4]}s";
+                    TotalAnswersText.Text = $"number of total answers: {response.Statistics[1]}";
+                    RightAnswersText.Text = $"number of right answers: {response.Statistics[2]}";
+                    AvgTimeText.Text = $"average time for answer: {response.Statistics[3]}s";
+                    ScoreText.Text = $"score: {response.Statistics[4]}";
                 }
             }
             catch (Exception ex)
@@ -64,10 +64,10 @@ namespace TriviaClient.Views
             ResponseInfo info = Communicator.Instance.ReceiveResponse();
             var response = Serializer.Deserialize<GetPersonalStatsResponse>(info.JsonPayload);
             GamesCountText.Text = $"number of games: {response.Statistics[0]}";
-            RightAnswersText.Text = $"number of right answers: {response.Statistics[1]}";
-            TotalAnswersText.Text = $"number of total answers: {response.Statistics[2]}";
-            WrongAnswersText.Text = $"number of wrong answers: {response.Statistics[3]}";
-            AvgTimeText.Text = $"average time for answer: {response.Statistics[4]}s";
+            TotalAnswersText.Text = $"number of total answers: {response.Statistics[1]}";
+            RightAnswersText.Text = $"number of right answers: {response.Statistics[2]}";
+            AvgTimeText.Text = $"average time for answer: {response.Statistics[3]}s";
+            ScoreText.Text = $"score: {response.Statistics[4]}";
         }
     }
 }

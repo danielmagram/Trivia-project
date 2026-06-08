@@ -60,3 +60,13 @@ CreateRoomRequest JsonRequestPacketDeserializer::deserializeCreateRoomRequest(co
 
     return req;
 }
+
+SubmitAnswerRequest JsonRequestPacketDeserializer::deserializeSubmitAnswerRequest(const std::vector<unsigned char>& buffer)
+{
+    SubmitAnswerRequest req;
+    json j = json::parse(buffer.begin(), buffer.end());
+
+    req.answerId = j["answerId"];
+
+    return req;
+}

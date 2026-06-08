@@ -4,9 +4,10 @@
 #include "RoomAdminRequestHandler.h"
 #include "RoomMemberRequestHandler.h"
 #include "SqliteDatabase.h"
+#include "GameRequestHandler.h"
 
 RequestHandlerFactory::RequestHandlerFactory()
-    : m_database(new SqliteDatabase()), m_loginManager(m_database), m_statisticsManager(m_database)
+	: m_database(new SqliteDatabase()), m_loginManager(m_database), m_statisticsManager(m_database), m_GameManager(m_database)
 {
 }
 
@@ -51,4 +52,14 @@ RoomManager& RequestHandlerFactory::getRoomManager()
 StatisticsManager& RequestHandlerFactory::getStatisticsManager()
 {
     return m_statisticsManager;
+}
+
+GameManager& RequestHandlerFactory::getGameManager()
+{
+    return m_GameManager;
+}
+
+std::unique_ptr<IRequestHandler> RequestHandlerFactory::createGameRequestHandler(LoggedUser loggedUser, int gameId)
+{
+    return std::make_unique<GameRequestHandler>(*this, loggedUser, gameId);
 }

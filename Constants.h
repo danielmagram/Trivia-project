@@ -16,6 +16,11 @@ enum class RequestCode : unsigned char {
 	GET_ROOM_STATE = 153,
 	LEAVE_ROOM = 154,
 	ADMIN_CLOSED_ROOM = 155,
+    LEAVE_GAME = 160,
+    GET_QUESTION = 161,
+    SUBMIT_ANSWER =162,
+    GET_GAME_RESULTS = 163
+
 };
 
 
@@ -30,4 +35,6 @@ enum class Status : unsigned int {
 	EMPTY_VALUE = 7,
 	USER_EXISTS = 8,
 	USER_ALREADY_LOGGED_IN = 9,
+	QUESTION_NOT_FOUND = 10,
+    GAME_NOT_FINISHED = 11
 };

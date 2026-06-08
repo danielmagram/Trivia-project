@@ -203,5 +203,69 @@ namespace TriviaClient.Models
         public uint Status { get; set; }
     }
 
+    //GAME REQUESTS
+    public class GetQuestionRequest { }
+
+    public class SubmitAnswerRequest
+    {
+        [JsonProperty("answerId")]
+        public uint AnswerId { get; set; }
+    }
+
+    public class GetGameResultsRequest { }
+
+    public class LeaveGameRequest { }
+
+    //GAME RESPONSES 
+    public class GetQuestionResponse
+    {
+        [JsonProperty("status")]
+        public uint Status { get; set; }
+
+        [JsonProperty("question")]
+        public string Question { get; set; }
+
+        [JsonProperty("answers")]
+        public List<object[]> Answers { get; set; }
+    }
+
+    public class SubmitAnswerResponse
+    {
+        [JsonProperty("status")]
+        public uint Status { get; set; }
+
+        [JsonProperty("correctAnswerId")]
+        public uint CorrectAnswerId { get; set; }
+    }
+
+    public class PlayerResults
+    {
+        [JsonProperty("username")]
+        public string Username { get; set; }
+
+        [JsonProperty("correctAnswerCount")]
+        public uint CorrectAnswerCount { get; set; }
+
+        [JsonProperty("wrongAnswerCount")]
+        public uint WrongAnswerCount { get; set; }
+
+        [JsonProperty("averageAnswerTime")]
+        public float AverageAnswerTime { get; set; }
+    }
+
+    public class GetGameResultsResponse
+    {
+        [JsonProperty("status")]
+        public uint Status { get; set; }
+
+        [JsonProperty("results")]
+        public List<PlayerResults> Results { get; set; }
+    }
+
+    public class LeaveGameResponse
+    {
+        [JsonProperty("status")]
+        public uint Status { get; set; }
+    }
 }
 

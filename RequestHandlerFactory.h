@@ -1,6 +1,7 @@
 #pragma once
 #include "StatisticsManager.h" 
 #include "RoomManager.h" 
+#include "GameManager.h" 
 #include "LoginManager.h" 
 #include "IDatabase.h"   
 #include "IRequestHandler.h" 
@@ -8,6 +9,7 @@
 // Forward declarations to avoid circular dependencies
 class Room;
 class LoggedUser;
+class GameRequestHandler;
 
 class RequestHandlerFactory
 {
@@ -20,7 +22,9 @@ public:
     std::unique_ptr<IRequestHandler> createMenuRequestHandler(const std::string& user);
     std::unique_ptr<IRequestHandler> createRoomAdminRequestHandler(LoggedUser loggedUser, Room* room);
     std::unique_ptr<IRequestHandler> createRoomMemberRequestHandler(LoggedUser loggedUser, Room* room);
+    std::unique_ptr<IRequestHandler> createGameRequestHandler(LoggedUser loggedUser, int gameId);
 
+    GameManager& getGameManager();
     LoginManager& getLoginManager();
     RoomManager& getRoomManager();
     StatisticsManager& getStatisticsManager();
@@ -29,4 +33,5 @@ private:
     LoginManager m_loginManager;
     RoomManager m_roomManager;
     StatisticsManager m_statisticsManager;
+    GameManager m_GameManager;
 };
