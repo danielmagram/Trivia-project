@@ -30,7 +30,10 @@ bool SqliteDatabase::open()
 		const char* sqlStatement = R"(CREATE TABLE USERS (
 			USERNAME TEXT PRIMARY KEY NOT NULL,
 			PASSWORD TEXT NOT NULL,
-			EMAIL TEXT NOT NULL
+			EMAIL TEXT NOT NULL,
+			ADDRESS TEXT NOT NULL,
+			PHONE TEXT NOT NULL,
+			DateOfBirth TEXT NOT NULL
 			);
 		)";
 		char* errMessage = nullptr;
@@ -127,14 +130,17 @@ bool SqliteDatabase::doesPasswordMatch(const std::string& username, const std::s
 	return match;
 }
 
-bool SqliteDatabase::addNewUser(const std::string& username, const std::string& password, const std::string& email)
+bool SqliteDatabase::addNewUser(const std::string& username, const std::string& password, const std::string& email, const std::string& address, const std::string& phone, const std::string& dateOfBirth)
 {
-	std::string sql = "INSERT INTO USERS (USERNAME, PASSWORD, EMAIL) VALUES (?, ?, ?);";
+	std::string sql = "INSERT INTO USERS (USERNAME, PASSWORD, EMAIL, ADDRESS, PHONE, DateOfBirth) VALUES (?, ?, ?, ?, ?, ?);";
 	sqlite3_stmt* stmt = prepareStatement(sql);
 
 	if (sqlite3_bind_text(stmt, 1, username.c_str(), -1, SQLITE_STATIC) != SQLITE_OK ||
 		sqlite3_bind_text(stmt, 2, password.c_str(), -1, SQLITE_STATIC) != SQLITE_OK ||
-		sqlite3_bind_text(stmt, 3, email.c_str(), -1, SQLITE_STATIC) != SQLITE_OK)
+		sqlite3_bind_text(stmt, 3, email.c_str(), -1, SQLITE_STATIC) != SQLITE_OK ||
+		sqlite3_bind_text(stmt, 4, address.c_str(), -1, SQLITE_STATIC) != SQLITE_OK ||
+		sqlite3_bind_text(stmt, 5, phone.c_str(), -1, SQLITE_STATIC) != SQLITE_OK ||
+		sqlite3_bind_text(stmt, 6, dateOfBirth.c_str(), -1, SQLITE_STATIC) != SQLITE_OK)
 	{
 		sqlite3_finalize(stmt);
 		throw std::runtime_error("Bind parameters failed: " + std::string(sqlite3_errmsg(m_db)));

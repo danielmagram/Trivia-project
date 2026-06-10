@@ -8,9 +8,9 @@ LoginManager::LoginManager(IDatabase* db)
 {
 }
 
-SignUpStatus LoginManager::signup(const std::string& username, const std::string& password, const std::string& email)
+SignUpStatus LoginManager::signup(const std::string& username, const std::string& password, const std::string& email, const std::string& address, const std::string& phone, const std::string& date)
 {
-    if (username.empty() || password.empty() || email.empty())
+    if (username.empty() || password.empty() || email.empty() || address.empty() || phone.empty() || date.empty())
     {
         return { static_cast<unsigned int>(Status::EMPTY_VALUE) };
     }
@@ -20,7 +20,7 @@ SignUpStatus LoginManager::signup(const std::string& username, const std::string
         if (m_database->doesUserExist(username))
             return { static_cast<unsigned int>(Status::USER_EXISTS) };
 
-        if (m_database->addNewUser(username, password, email))
+        if (m_database->addNewUser(username, password, email, address, phone, date))
         {
             m_database->initUserStatistics(username);
             return { static_cast<unsigned int>(Status::SUCCESS) };
