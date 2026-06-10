@@ -86,7 +86,7 @@ RequestResult LoginRequestHandler::signup(const RequestInfo& info)
     {
         res.status = static_cast<unsigned int>(Status::SUCCESS);
         result.response = JsonResponsePacketSerializer::serializeResponse(res);
-		result.newHandler = std::move(m_handlerFactory.createLoginRequestHandler());
+		result.newHandler = std::move(m_handlerFactory.createMenuRequestHandler(req.username));
     }
     else
     {

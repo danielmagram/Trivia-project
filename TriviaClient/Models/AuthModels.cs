@@ -43,6 +43,15 @@ namespace TriviaClient.Models
 
         [JsonProperty("email")]
         public string Email { get; set; }
+
+        [JsonProperty("address")]
+        public string Address { get; set; }
+
+        [JsonProperty("phoneNumber")]
+        public string PhoneNumber { get; set; }
+
+        [JsonProperty("dateOfBirth")]
+        public string DateOfBirth { get; set; }
     }
 
     public class GetPlayersInRoomRequest // fix

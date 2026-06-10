@@ -31,8 +31,11 @@ namespace TriviaClient.Views
             string username = UsernameBox.Text;
             string password = PasswordBox.Password;
             string email = EmailBox.Text;
+            string address = AddressBox.Text;
+            string phoneNumber = PhoneNumberBox.Text;
+            string dateOfBirth = DateOfBirthBox.Text;
 
-            if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password) || string.IsNullOrWhiteSpace(email))
+            if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password) || string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(address) || string.IsNullOrWhiteSpace(phoneNumber) || string.IsNullOrWhiteSpace(dateOfBirth))
             {
                 MessageBox.Show("Please fill in all fields.", "Input Error", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
@@ -44,7 +47,10 @@ namespace TriviaClient.Views
                 {
                     Username = username,
                     Password = password,
-                    Email = email
+                    Email = email,
+                    Address = address,
+                    PhoneNumber = phoneNumber,
+                    DateOfBirth = dateOfBirth
                 };
 
                 Communicator.Instance.SendRequest(33, Serializer.Serialize(req));
