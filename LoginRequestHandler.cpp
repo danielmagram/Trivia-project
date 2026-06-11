@@ -79,14 +79,14 @@ RequestResult LoginRequestHandler::signup(const RequestInfo& info)
     RequestResult result;
     SignupRequest req = JsonRequestPacketDeserializer::deserializeSignUpRequest(info.buffer);
 
-    SignUpStatus status = m_handlerFactory.getLoginManager().signup(req.username, req.password, req.email);
+    SignUpStatus status = m_handlerFactory.getLoginManager().signup(req.username, req.password, req.email, req.address, req.phoneNumber, req.dateOfBirth);
 
     SignupResponse res;
     if (status.status == static_cast<unsigned int>(Status::SUCCESS)) // SUCCESS
     {
         res.status = static_cast<unsigned int>(Status::SUCCESS);
         result.response = JsonResponsePacketSerializer::serializeResponse(res);
-		result.newHandler = std::move(m_handlerFactory.createLoginRequestHandler());
+		result.newHandler = std::move(m_handlerFactory.createMenuRequestHandler(req.username));
     }
     else
     {

@@ -52,7 +52,21 @@
             <TextBox x:Name="EmailBox"
                      Height="30"
                      Margin="0,5,0,20"/>
-
+            <TextBlock Text="Address:"
+                       Foreground="Black"/>
+            <TextBox x:Name="AddressBox"
+                     Height="30"
+                     Margin="0,5,0,20"/>
+            <TextBlock Text="Phone Number:"
+                       Foreground="Black"/>
+            <TextBox x:Name="PhoneNumberBox"
+                     Height="30"
+                     Margin="0,5,0,20"/>
+            <TextBlock Text="Date of Birth:"
+                       Foreground="Black"/>
+            <TextBox x:Name="DateOfBirthBox"
+                     Height="30"
+                     Margin="0,5,0,20"/>
             <Button Content="Send"
                     Height="40"
                     Click="Send_Click"/>

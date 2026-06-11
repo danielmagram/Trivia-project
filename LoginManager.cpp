@@ -2,15 +2,17 @@
 #include "Constants.h"
 #include <algorithm> 
 #include <iostream>
+#include <regex>
+
 
 LoginManager::LoginManager(IDatabase* db)
     : m_database(db)
 {
 }
 
-SignUpStatus LoginManager::signup(const std::string& username, const std::string& password, const std::string& email)
+SignUpStatus LoginManager::signup(const std::string& username, const std::string& password, const std::string& email, const std::string& address, const std::string& phone, const std::string& date)
 {
-    if (username.empty() || password.empty() || email.empty())
+    if (username.empty() || password.empty() || email.empty() || address.empty() || phone.empty() || date.empty())
     {
         return { static_cast<unsigned int>(Status::EMPTY_VALUE) };
     }
@@ -19,8 +21,38 @@ SignUpStatus LoginManager::signup(const std::string& username, const std::string
     {
         if (m_database->doesUserExist(username))
             return { static_cast<unsigned int>(Status::USER_EXISTS) };
+        
+		const std::regex passwordRegex("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*^?&])[A-Za-z\\d@$!%*^?&]{8,}$");
 
-        if (m_database->addNewUser(username, password, email))
+		if (!std::regex_match(password, passwordRegex))
+		{
+			return { static_cast<unsigned int>(Status::INVALID_PASSWORD) };
+		}
+        const std::regex emailRegex(R"([a-zA-Z0-9]+@[a-zA-Z0-9]+(?:\.[a-zA-Z0-9]+)+)");
+
+        if (!std::regex_match(email, emailRegex)) 
+        {
+            return { static_cast<unsigned int>(Status::INVALID_EMAIL) };
+        }
+		const std::regex addressRegex(R"(^[a-zA-Z\s]+,\s*\d+\s*,\s*[a-zA-Z\s]+$)");
+
+        if (!std::regex_match(address, addressRegex)) 
+        {
+            return { static_cast<unsigned int>(Status::INVALID_ADDRESS) };
+		}
+		const std::regex phoneRegex(R"(^0\d{1,2}-\d{7}$)");
+        if (!std::regex_match(phone, phoneRegex))
+        {
+            return { static_cast<unsigned int>(Status::INVALID_PHONE) };
+        }
+		const std::regex dateRegex(R"(^((0[1-9]|[12][0-9]|3[01])([./])(0[1-9]|1[0-2])\3(19|20)\d{2})$)");
+
+        if (!std::regex_match(date, dateRegex))
+        {
+            return { static_cast<unsigned int>(Status::INVALID_DATE) };
+		}
+
+        if (m_database->addNewUser(username, password, email, address, phone, date))
         {
             m_database->initUserStatistics(username);
             return { static_cast<unsigned int>(Status::SUCCESS) };
