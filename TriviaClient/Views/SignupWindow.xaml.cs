@@ -80,6 +80,23 @@ namespace TriviaClient.Views
                     case 2: // DB ERROR
                         MessageBox.Show("A database error occurred on the server.", "Server Error", MessageBoxButton.OK, MessageBoxImage.Error);
                         break;
+                    case 12: // INVALID PASSWORD
+                        MessageBox.Show("Password is not valid. a valid password need to have at least 8 characters, including uppercase, lowercase, number and special character.", "Signup Failed", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        break;
+                    case 13: // INVALID EMAIL
+                        MessageBox.Show("Email is not valid. Please enter a valid email address.", "Signup Failed", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        break;
+                    case 14: // INVALID ADDRESS
+                        MessageBox.Show("Address is not valid. A valid address should be in the format 'Street, Number, City'.", "Signup Failed", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        break;
+                    case 15:// INVALID PHONE NUMBER
+                        MessageBox.Show("Phone number is not valid. A valid phone number should be in the format '0XX-XXXXXXX or 0X-XXXXXXX'.", "Signup Failed", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        break;
+                    case 16: // INVALID DATE OF BIRTH
+                        MessageBox.Show("Date of birth is not valid. A valid date of birth should be in the format DD.MM.YYYY OR DD/MM/YYYY.", "Signup Failed", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        break;
+
+
 
                     default:
                         MessageBox.Show($"Unexpected status code: {response.Status}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
