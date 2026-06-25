@@ -193,12 +193,12 @@ Add screenshots of:
 ---
 
 ## Authors
-
 **Daniel Magram**  
 C++ Server Development • Networking • Cybersecurity
 
-**Oshri Grubman**
+**Oshri Grubman**  
 C++ Server Development • Networking • Cybersecurity
+
 ---
 
 ## Educational Purpose
